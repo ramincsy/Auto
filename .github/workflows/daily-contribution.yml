@@ -2,7 +2,7 @@ name: Daily Contributions
 
 on:
   schedule:
-    - cron: '*/5 * * * *' # هر 5 دقیقه
+    - cron: '0 */12 * * *' # هر 12 ساعت یک بار
   workflow_dispatch: # اجازه اجرای دستی
 
 jobs:
