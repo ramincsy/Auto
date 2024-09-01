@@ -1,0 +1,43 @@
+name: Daily Contributions
+
+on:
+  schedule:
+    - cron: '0 0 * * 1-5' # هر روز از دوشنبه تا جمعه در ساعت 00:00 UTC
+
+jobs:
+  make-contribution:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # کل تاریخچه commit را دریافت می‌کند
+
+      - name: Make daily contribution
+        run: |
+          echo "Making daily contribution"
+          echo "$(date)" >> README.md # تاریخ را به فایل README.md اضافه می‌کند
+
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v7
+        with:
+          author_name: "ramincsy" # نام کاربری شما
+          author_email: "ramincsy2@gmail.com" # ایمیل مرتبط با حساب GitHub شما
+          message: "Daily contribution"
+          add: "README.md" # اضافه کردن README.md به commit
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: daily-contribution # push کردن به شاخه daily-contribution
+          github_token: ${{ secrets.GH_TOKEN }} # استفاده از secret شما به جای GITHUB_TOKEN
+
+      - name: Open pull request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          title: "Daily Contribution"
+          commit-message: "Daily contribution"
+          branch: daily-contribution
+          base: main # ارسال pull request به شاخه main
+          body: "This pull request was created automatically by a GitHub Actions workflow to make a daily contribution."
+          token: ${{ secrets.GH_TOKEN }} # استفاده از secret شما به جای GITHUB_TOKEN
