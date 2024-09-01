@@ -2,7 +2,7 @@ name: Daily Contributions
 
 on:
   schedule:
-    - cron: '0 0 * * 1-5' # هر روز از دوشنبه تا جمعه در ساعت 00:00 UTC
+    - cron: '*/5 * * * *' # هر روز از دوشنبه تا جمعه در ساعت 00:00 UTC
 
 jobs:
   make-contribution:
