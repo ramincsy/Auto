@@ -2,7 +2,8 @@ name: Daily Contributions
 
 on:
   schedule:
-    - cron: '*/5 * * * *' # هر روز از دوشنبه تا جمعه در ساعت 00:00 UTC
+    - cron: '*/5 * * * *' # هر 5 دقیقه
+  workflow_dispatch: # اجازه اجرای دستی
 
 jobs:
   make-contribution:
