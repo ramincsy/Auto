@@ -14,20 +14,25 @@ jobs:
         with:
           fetch-depth: 0 # کل تاریخچه commit را دریافت می‌کند
 
+      - name: Configure Git user
+        run: |
+          git config --global user.name "ramincsy"  # نام کاربری خود را وارد کنید
+          git config --global user.email "ramincsy2@gmail.com"  # ایمیل خود را وارد کنید
+
       - name: Get day of week
         id: day_of_week
-        run: echo "day=$(date +%u)" >> $GITHUB_ENV # دریافت شماره روز هفته (1=دوشنبه, 7=یکشنبه)
+        run: echo "day=$(date +%u)" >> $GITHUB_ENV # روز هفته را تنظیم می‌کند
 
       - name: Set number of commits
         id: num_commits
         run: |
           case ${{ env.day }} in
-            1) num=1 ;; # دوشنبه: 1 کامیت
-            2) num=2 ;; # سه‌شنبه: 2 کامیت
-            3) num=3 ;; # چهارشنبه: 3 کامیت
-            4) num=4 ;; # پنج‌شنبه: 4 کامیت
-            5) num=5 ;; # جمعه: 5 کامیت
-            6) num=6 ;; # شنبه: 6 کامیت
+            1) num=1 ;;  # دوشنبه: 1 کامیت
+            2) num=2 ;;  # سه‌شنبه: 2 کامیت
+            3) num=3 ;;  # چهارشنبه: 3 کامیت
+            4) num=4 ;;  # پنج‌شنبه: 4 کامیت
+            5) num=5 ;;  # جمعه: 5 کامیت
+            6) num=6 ;;  # شنبه: 6 کامیت
             7) num=10 ;; # یکشنبه: 10 کامیت
           esac
           echo "Number of commits set to: $num"
@@ -36,10 +41,16 @@ jobs:
       - name: Make daily contributions
         run: |
           for i in $(seq 1 ${{ env.num_commits }}); do
-            echo "Contribution $i on $(date)" >> README.md
-            git add README.md
-            git commit -m "Contribution $i on $(date)"
+            echo "Commit number $i" >> README.md
           done
+
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v7
+        with:
+          author_name: "ramincsy" # نام کاربری شما
+          author_email: "ramincsy2@gmail.com" # ایمیل مرتبط با حساب GitHub شما
+          message: "Daily contribution"
+          add: "README.md" # اضافه کردن README.md به commit
 
       - name: Push changes
         uses: ad-m/github-push-action@master
@@ -54,5 +65,5 @@ jobs:
           commit-message: "Daily contribution"
           branch: daily-contribution
           base: main # ارسال pull request به شاخه main
-          body: "This pull request was created automatically by a GitHub Actions workflow to make daily contributions."
+          body: "This pull request was created automatically by a GitHub Actions workflow to make a daily contribution."
           token: ${{ secrets.GH_TOKEN }} # استفاده از secret شما به جای GITHUB_TOKEN
