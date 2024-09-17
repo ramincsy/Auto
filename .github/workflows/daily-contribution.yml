@@ -2,7 +2,7 @@ name: Daily Contributions
 
 on:
   schedule:
-    - cron: '0 */12 * * *' # هر 12 ساعت یک بار اجرا
+    - cron: '0 */12 * * *' # هر 12 ساعت یک بار
   workflow_dispatch: # اجازه اجرای دستی
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
       - name: Make daily contributions
         run: |
           for i in $(seq 1 ${{ env.day_of_month }}); do
-            echo "Commit number $i on day ${{ env.day_of_month }}" >> README.md
+            echo "Contribution $i on day ${{ env.day_of_month }}" >> README.md
           done
 
       - name: Commit changes
