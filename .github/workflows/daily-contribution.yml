@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3 # به نسخه جدیدتر تغییر یافت
         with:
           fetch-depth: 0 # کل تاریخچه commit را دریافت می‌کند
 
@@ -25,7 +25,7 @@ jobs:
           done
 
       - name: Commit changes
-        uses: EndBug/add-and-commit@v7
+        uses: EndBug/add-and-commit@v8 # به نسخه جدیدتر تغییر یافت
         with:
           author_name: "ramincsy" # نام کاربری شما
           author_email: "ramincsy2@gmail.com" # ایمیل مرتبط با حساب GitHub شما
@@ -33,13 +33,13 @@ jobs:
           add: "README.md" # اضافه کردن README.md به commit
 
       - name: Push changes
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@v2 # به نسخه جدیدتر تغییر یافت
         with:
           branch: daily-contribution # push کردن به شاخه daily-contribution
           github_token: ${{ secrets.GH_TOKEN }} # استفاده از secret شما به جای GITHUB_TOKEN
 
       - name: Open pull request
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v4 # به نسخه جدیدتر تغییر یافت
         with:
           title: "Daily Contribution for day ${{ env.day_of_month }}"
           commit-message: "Daily contribution for day ${{ env.day_of_month }}"
