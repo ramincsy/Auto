@@ -1,8 +1,8 @@
-name: Daily Contributions
+name: Random Daily Contributions
 
 on:
   schedule:
-    - cron: '0 */12 * * *' # هر 12 ساعت یک بار
+    - cron: '0 */12 * * *' # هر 12 ساعت یک بار اجرا می‌شود
   workflow_dispatch: # اجازه اجرای دستی
 
 jobs:
@@ -10,31 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3 # به‌روزرسانی به نسخه جدید
+        uses: actions/checkout@v3 # استفاده از نسخه جدید
 
       - name: Configure Git user
         run: |
           git config --global user.name "ramincsy"  # نام کاربری خود را وارد کنید
           git config --global user.email "ramincsy2@gmail.com"  # ایمیل خود را وارد کنید
 
-      - name: Get day of week
-        id: day_of_week
-        run: echo "day=$(date +%u)" >> $GITHUB_ENV # روز هفته را تنظیم می‌کند
-
-      - name: Set number of commits
+      - name: Set random number of commits
         id: num_commits
         run: |
-          case ${{ env.day }} in
-            1) num=1 ;;  # دوشنبه: 1 کامیت
-            2) num=2 ;;  # سه‌شنبه: 2 کامیت
-            3) num=3 ;;  # چهارشنبه: 3 کامیت
-            4) num=4 ;;  # پنج‌شنبه: 4 کامیت
-            5) num=5 ;;  # جمعه: 5 کامیت
-            6) num=6 ;;  # شنبه: 6 کامیت
-            7) num=10 ;; # یکشنبه: 10 کامیت
-          esac
-          echo "Number of commits set to: $num"
-          echo "num_commits=$num" >> $GITHUB_ENV # تعداد کامیت‌ها را تنظیم می‌کند
+          num=$(( ( RANDOM % 10 )  + 2 )) # تولید یک عدد تصادفی بین 1 تا 10
+          echo "Random number of commits: $num"
+          echo "num_commits=$num" >> $GITHUB_ENV
 
       - name: Make daily contributions
         run: |
@@ -47,7 +35,7 @@ jobs:
         with:
           author_name: "ramincsy" # نام کاربری شما
           author_email: "ramincsy2@gmail.com" # ایمیل مرتبط با حساب GitHub شما
-          message: "Daily contribution"
+          message: "Random daily contribution"
           add: "README.md" # اضافه کردن README.md به commit
 
       - name: Push changes
@@ -57,11 +45,11 @@ jobs:
           github_token: ${{ secrets.GH_TOKEN }} # استفاده از secret شما به جای GITHUB_TOKEN
 
       - name: Open pull request
-        uses: peter-evans/create-pull-request@v3 # به‌روزرسانی به نسخه جدید
+        uses: peter-evans/create-pull-request@v3 # استفاده از نسخه جدید
         with:
-          title: "Daily Contribution"
-          commit-message: "Daily contribution"
+          title: "Random Daily Contribution"
+          commit-message: "Random daily contribution"
           branch: daily-contribution
           base: main # ارسال pull request به شاخه main
-          body: "This pull request was created automatically by a GitHub Actions workflow to make a daily contribution."
+          body: "This pull request was created automatically by a GitHub Actions workflow to make a random number of daily contributions."
           token: ${{ secrets.GH_TOKEN }} # استفاده از secret شما به جای GITHUB_TOKEN
