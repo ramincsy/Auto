@@ -30,6 +30,7 @@ jobs:
             6) num=6 ;; # شنبه: 6 کامیت
             7) num=10 ;; # یکشنبه: 10 کامیت
           esac
+          echo "Number of commits set to: $num"
           echo "num_commits=$num" >> $GITHUB_ENV # تعداد کامیت‌ها را تنظیم می‌کند
 
       - name: Make daily contributions
