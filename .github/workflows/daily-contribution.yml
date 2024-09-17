@@ -10,9 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # کل تاریخچه commit را دریافت می‌کند
+        uses: actions/checkout@v3 # به‌روزرسانی به نسخه جدید
 
       - name: Configure Git user
         run: |
@@ -59,7 +57,7 @@ jobs:
           github_token: ${{ secrets.GH_TOKEN }} # استفاده از secret شما به جای GITHUB_TOKEN
 
       - name: Open pull request
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v3 # به‌روزرسانی به نسخه جدید
         with:
           title: "Daily Contribution"
           commit-message: "Daily contribution"
