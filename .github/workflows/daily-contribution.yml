@@ -1,23 +1,55 @@
-name: Test Pull Request
+name: Daily Contributions
 
 on:
+  schedule:
+    - cron: '0 */12 * * *' # هر 12 ساعت یک بار
   workflow_dispatch: # اجازه اجرای دستی
 
 jobs:
-  test-pull-request:
+  make-contribution:
     runs-on: ubuntu-latest
     steps:
+      # Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Create pull request
+      # Get current day of the month
+      - name: Get current day of the month
+        id: day_of_month
+        run: echo "day_of_month=$(date +'%d')" >> $GITHUB_ENV
+
+      # Make daily contributions
+      - name: Make daily contributions
+        run: |
+          for i in $(seq 1 ${{ env.day_of_month }}); do
+            echo "Contribution $i on day ${{ env.day_of_month }}" >> README.md
+          done
+
+      # Commit changes
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v8
+        with:
+          author_name: "ramincsy"
+          author_email: "ramincsy2@gmail.com"
+          message: "Daily contribution on day ${{ env.day_of_month }}"
+          add: "README.md"
+
+      # Push changes
+      - name: Push changes
+        uses: github-actions-x/commit@v2.9
+        with:
+          branch: daily-contribution
+          github_token: ${{ secrets.GH_TOKEN }}
+
+      # Create Pull Request
+      - name: Open pull request
         uses: peter-evans/create-pull-request@v4
         with:
-          title: "Test Pull Request"
-          commit-message: "Test pull request creation"
+          title: "Daily Contribution for day ${{ env.day_of_month }}"
+          commit-message: "Daily contribution for day ${{ env.day_of_month }}"
           branch: daily-contribution
           base: main
-          body: "This is a test pull request."
-          token: ${{ secrets.GITHUB_TOKEN }}
+          body: "This pull request was created automatically by a GitHub Actions workflow."
+          token: ${{ secrets.GH_TOKEN }}
