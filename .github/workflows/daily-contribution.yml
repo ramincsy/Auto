@@ -1,13 +1,23 @@
-name: Test Checkout
+name: Test Pull Request
 
 on:
   workflow_dispatch: # اجازه اجرای دستی
 
 jobs:
-  test-checkout:
+  test-pull-request:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # کل تاریخچه commit را دریافت می‌کند
+          fetch-depth: 0
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: "Test Pull Request"
+          commit-message: "Test pull request creation"
+          branch: daily-contribution
+          base: main
+          body: "This is a test pull request."
+          token: ${{ secrets.GITHUB_TOKEN }}
