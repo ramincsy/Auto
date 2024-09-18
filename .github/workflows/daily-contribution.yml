@@ -47,3 +47,29 @@ jobs:
           base: main # ارسال pull request به شاخه main
           body: "This pull request was created automatically by a GitHub Actions workflow to make contributions based on the day of the month."
           token: ${{ secrets.GH_TOKEN }} # استفاده از secret شما به جای GITHUB_TOKEN
+
+      # 1. ایجاد Issue
+      - name: Create a new issue
+        uses: peter-evans/create-issue@v3
+        with:
+          title: "Daily Issue - Day ${{ env.day_of_month }}"
+          body: "This issue was created automatically for testing purposes."
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 2. Code Review
+      - name: Perform code review
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/ramincsy/REPOSITORY/pulls/PR_NUMBER/reviews \
+            -d '{"event":"APPROVE", "body":"Code looks good!"}'
+
+      # 3. Merge Pull Request
+      - name: Merge pull request
+        run: |
+          curl -X PUT \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/ramincsy/REPOSITORY/pulls/PR_NUMBER/merge \
+            -d '{"commit_title":"Merging pull request", "merge_method":"merge"}'
