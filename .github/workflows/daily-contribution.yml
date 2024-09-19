@@ -1,10 +1,8 @@
-name: Enhanced Daily Contributions
-
+name: Enhanced Daily Contributions and Achievement Hunter
 on:
   schedule:
     - cron: '0 */12 * * *'  # Run every 12 hours
   workflow_dispatch:  # Allow manual trigger
-
 jobs:
   make-contribution:
     runs-on: ubuntu-latest
@@ -13,19 +11,16 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Fetch all history for all branches and tags
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
-
       - name: Get current date info
         id: date
         run: |
           echo "day=$(date +'%d')" >> $GITHUB_OUTPUT
           echo "month=$(date +'%m')" >> $GITHUB_OUTPUT
           echo "year=$(date +'%Y')" >> $GITHUB_OUTPUT
-
       - name: Generate daily content
         run: |
           python -c "
@@ -40,11 +35,66 @@ jobs:
               for i in range(int('${{ steps.date.outputs.day }}')):
                   f.write(f'- {generate_content()}\n')
           "
-
       - name: Create directory structure and new file
         run: |
           mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
           echo "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
+      
+      # New step: Create a discussion
+      - name: Create Discussion
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            github.rest.discussions.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              category_id: '3',  # Replace with your discussion category ID
+              title: `Daily Discussion: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}`,
+              body: 'What\'s your favorite programming language and why?'
+            })
+
+      # New step: React to Pull Requests
+      - name: React to Pull Requests
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const pulls = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+            for (const pull of pulls.data) {
+              await github.rest.reactions.createForIssue({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pull.number,
+                content: 'heart'
+              });
+            }
+
+      # New step: Close old issues (Quickdraw attempt)
+      - name: Close old issues
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+            for (const issue of issues.data) {
+              if (issue.created_at < new Date(Date.now() - 24*60*60*1000).toISOString()) {
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed'
+                });
+              }
+            }
 
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
@@ -53,13 +103,11 @@ jobs:
           author_email: "ramincsy2@gmail.com"
           message: "Daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
           add: "README.md updates/"
-
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
           github_token: ${{ secrets.GH_TOKEN }}
-
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
@@ -74,7 +122,6 @@ jobs:
             - Created a new file for today's update
           branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
           base: main
-
       - name: Create Issue
         uses: actions/github-script@v6
         with:
