@@ -28,12 +28,15 @@ jobs:
             echo "Contribution $i on day $DAY_OF_MONTH" >> README.md
           done
 
-      - name: Commit & Push changes
-        uses: actions-js/push@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}  # توکن برای احراز هویت
-          author_name: "ramincsy"
-          author_email: "ramincsy2@gmail.com"
-          message: "Daily contribution on day $DAY_OF_MONTH"
-          branch: "main"  # نام شاخه مقصد برای پوش کردن
-          rebase: true    # استفاده از git pull --rebase قبل از پوش کردن
+      - name: Commit changes
+        run: |
+          git config --global user.name "ramincsy"
+          git config --global user.email "ramincsy2@gmail.com"
+          git add README.md
+          git commit -m "Daily contribution on day $DAY_OF_MONTH" || echo "No changes to commit"
+
+      - name: Pull and Push changes
+        run: |
+          git fetch origin
+          git pull --rebase origin main
+          git push origin main
