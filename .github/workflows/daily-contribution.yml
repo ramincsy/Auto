@@ -1,9 +1,9 @@
-name: Daily Contributions
+name: Enhanced Daily Contributions
 
 on:
   schedule:
-    - cron: '0 */12 * * *' # هر 12 ساعت یک بار
-  workflow_dispatch: # اجازه اجرای دستی
+    - cron: '0 */12 * * *'  # Run every 12 hours
+  workflow_dispatch:  # Allow manual trigger
 
 jobs:
   make-contribution:
@@ -12,31 +12,76 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          persist-credentials: false  # برای استفاده از توکن شخصی
-          fetch-depth: 0              # برای پوش کردن refs به مخزن مقصد
+          fetch-depth: 0  # Fetch all history for all branches and tags
 
-      - name: Get current day of the month
-        id: day_of_month
-        run: echo "DAY_OF_MONTH=$(date +'%d')" >> $GITHUB_ENV
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
 
-      - name: Make daily contributions
+      - name: Get current date info
+        id: date
         run: |
-          # اطمینان از وجود فایل README.md
-          touch README.md
-          # اضافه کردن contributions به فایل
-          for i in $(seq 1 $DAY_OF_MONTH); do
-            echo "Contribution $i on day $DAY_OF_MONTH" >> README.md
-          done
+          echo "day=$(date +'%d')" >> $GITHUB_OUTPUT
+          echo "month=$(date +'%m')" >> $GITHUB_OUTPUT
+          echo "year=$(date +'%Y')" >> $GITHUB_OUTPUT
+
+      - name: Generate daily content
+        run: |
+          python -c "
+          import random
+          
+          def generate_content():
+              topics = ['AI', 'Machine Learning', 'Data Science', 'Web Development', 'Cloud Computing']
+              return f'Daily study topic: {random.choice(topics)}'
+          
+          with open('README.md', 'a') as f:
+              f.write(f'\n\n## Contribution for {'${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}'}\n')
+              for i in range(int('${{ steps.date.outputs.day }}')):
+                  f.write(f'- {generate_content()}\n')
+          "
+
+      - name: Create new file with current date
+        run: |
+          echo "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
 
       - name: Commit changes
-        run: |
-          git config --global user.name "ramincsy"
-          git config --global user.email "ramincsy2@gmail.com"
-          git add README.md
-          git commit -m "Daily contribution on day $DAY_OF_MONTH" || echo "No changes to commit"
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: "ramincsy"
+          author_email: "ramincsy2@gmail.com"
+          message: "Daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
+          add: "README.md updates/"
 
-      - name: Pull and Push changes
-        run: |
-          git fetch origin
-          git pull --rebase origin main
-          git push origin main
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
+          github_token: ${{ secrets.GH_TOKEN }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          commit-message: "Daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
+          title: "Daily Contribution: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
+          body: |
+            This pull request was automatically generated to add the daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}.
+            
+            Changes include:
+            - Updated README.md with new daily topics
+            - Created a new file for today's update
+          branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
+          base: main
+
+      - name: Create Issue
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Daily Contribution Report: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}`,
+              body: 'A new daily contribution has been made. Please review the latest pull request.'
+            })
