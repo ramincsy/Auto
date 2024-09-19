@@ -24,9 +24,10 @@ jobs:
             echo "Contribution $i on day $DAY_OF_MONTH" >> README.md
           done
 
-      - name: Pull remote changes
+      - name: Fetch and Rebase
         run: |
-          git pull origin main
+          git fetch origin
+          git rebase origin/main
 
       - name: Commit and Push changes
         uses: EndBug/add-and-commit@v8
