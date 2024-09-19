@@ -27,21 +27,15 @@ jobs:
             echo "Contribution $i on day ${{ steps.day_of_month.outputs.day_of_month }}" >> README.md
           done
 
-      # Commit changes
-      - name: Commit changes
+      # Commit and push changes
+      - name: Commit and Push changes
         uses: EndBug/add-and-commit@v8
         with:
           author_name: "ramincsy"
           author_email: "ramincsy2@gmail.com"
           message: "Daily contribution on day ${{ steps.day_of_month.outputs.day_of_month }}"
           add: "README.md"
-
-      # Push changes
-      - name: Push changes
-        uses: actions/checkout@v3
-        with:
-          ref: daily-contribution
-          token: ${{ secrets.GITHUB_TOKEN }}
+          push: true # Push changes directly
 
       # Create Pull Request
       - name: Open pull request
