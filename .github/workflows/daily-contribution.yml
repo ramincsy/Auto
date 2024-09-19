@@ -23,8 +23,8 @@ jobs:
       # Make daily contributions
       - name: Make daily contributions
         run: |
-          for i in $(seq 1 ${{ env.day_of_month }}); do
-            echo "Contribution $i on day ${{ env.day_of_month }}" >> README.md
+          for i in $(seq 1 ${{ steps.day_of_month.outputs.day_of_month }}); do
+            echo "Contribution $i on day ${{ steps.day_of_month.outputs.day_of_month }}" >> README.md
           done
 
       # Commit changes
@@ -33,22 +33,22 @@ jobs:
         with:
           author_name: "ramincsy"
           author_email: "ramincsy2@gmail.com"
-          message: "Daily contribution on day ${{ env.day_of_month }}"
+          message: "Daily contribution on day ${{ steps.day_of_month.outputs.day_of_month }}"
           add: "README.md"
 
       # Push changes
       - name: Push changes
-        uses: github-actions-x/commit@v2.9
+        uses: actions/checkout@v3
         with:
-          branch: daily-contribution
-          github_token: ${{ secrets.GH_TOKEN }}
+          ref: daily-contribution
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # Create Pull Request
       - name: Open pull request
         uses: peter-evans/create-pull-request@v4
         with:
-          title: "Daily Contribution for day ${{ env.day_of_month }}"
-          commit-message: "Daily contribution for day ${{ env.day_of_month }}"
+          title: "Daily Contribution for day ${{ steps.day_of_month.outputs.day_of_month }}"
+          commit-message: "Daily contribution for day ${{ steps.day_of_month.outputs.day_of_month }}"
           branch: daily-contribution
           base: main
           body: "This pull request was created automatically by a GitHub Actions workflow."
