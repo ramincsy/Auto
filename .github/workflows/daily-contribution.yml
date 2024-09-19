@@ -20,14 +20,17 @@ jobs:
 
       - name: Make daily contributions
         run: |
+          # اطمینان از وجود فایل README.md
+          touch README.md
+          # اضافه کردن contributions به فایل
           for i in $(seq 1 $DAY_OF_MONTH); do
             echo "Contribution $i on day $DAY_OF_MONTH" >> README.md
           done
 
-      - name: Fetch and Rebase
+      - name: Fetch and Merge
         run: |
           git fetch origin
-          git rebase origin/main
+          git merge origin/main
 
       - name: Commit and Push changes
         uses: EndBug/add-and-commit@v8
