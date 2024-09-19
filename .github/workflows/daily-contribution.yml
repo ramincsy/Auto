@@ -41,8 +41,9 @@ jobs:
                   f.write(f'- {generate_content()}\n')
           "
 
-      - name: Create new file with current date
+      - name: Create directory structure and new file
         run: |
+          mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
           echo "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
 
       - name: Commit changes
