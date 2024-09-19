@@ -18,13 +18,13 @@ jobs:
       # Get current day of the month
       - name: Get current day of the month
         id: day_of_month
-        run: echo "day_of_month=$(date +'%d')" >> $GITHUB_ENV
+        run: echo "DAY_OF_MONTH=$(date +'%d')" >> $GITHUB_ENV
 
       # Make daily contributions
       - name: Make daily contributions
         run: |
-          for i in $(seq 1 ${{ steps.day_of_month.outputs.day_of_month }}); do
-            echo "Contribution $i on day ${{ steps.day_of_month.outputs.day_of_month }}" >> README.md
+          for i in $(seq 1 $DAY_OF_MONTH); do
+            echo "Contribution $i on day $DAY_OF_MONTH" >> README.md
           done
 
       # Pull remote changes before commit
@@ -37,7 +37,7 @@ jobs:
         with:
           author_name: "ramincsy"
           author_email: "ramincsy2@gmail.com"
-          message: "Daily contribution on day ${{ steps.day_of_month.outputs.day_of_month }}"
+          message: "Daily contribution on day $DAY_OF_MONTH"
           add: "README.md"
           push: true # Push changes directly
 
@@ -45,8 +45,8 @@ jobs:
       - name: Open pull request
         uses: peter-evans/create-pull-request@v4
         with:
-          title: "Daily Contribution for day ${{ steps.day_of_month.outputs.day_of_month }}"
-          commit-message: "Daily contribution for day ${{ steps.day_of_month.outputs.day_of_month }}"
+          title: "Daily Contribution for day $DAY_OF_MONTH"
+          commit-message: "Daily contribution for day $DAY_OF_MONTH"
           branch: daily-contribution
           base: main
           body: "This pull request was created automatically by a GitHub Actions workflow."
