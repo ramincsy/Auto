@@ -9,32 +9,25 @@ jobs:
   make-contribution:
     runs-on: ubuntu-latest
     steps:
-      # Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      # Get current day of the month
       - name: Get current day of the month
         id: day_of_month
         run: echo "DAY_OF_MONTH=$(date +'%d')" >> $GITHUB_ENV
 
-      # Make daily contributions
       - name: Make daily contributions
         run: |
           for i in $(seq 1 $DAY_OF_MONTH); do
             echo "Contribution $i on day $DAY_OF_MONTH" >> README.md
           done
 
-      # Pull remote changes before commit
       - name: Pull remote changes
         run: |
-          git fetch origin
-          git checkout main
           git pull origin main
 
-      # Commit and push changes
       - name: Commit and Push changes
         uses: EndBug/add-and-commit@v8
         with:
@@ -42,15 +35,4 @@ jobs:
           author_email: "ramincsy2@gmail.com"
           message: "Daily contribution on day $DAY_OF_MONTH"
           add: "README.md"
-          push: true # Push changes directly
-
-      # Create Pull Request
-      - name: Open pull request
-        uses: peter-evans/create-pull-request@v4
-        with:
-          title: "Daily Contribution for day $DAY_OF_MONTH"
-          commit-message: "Daily contribution for day $DAY_OF_MONTH"
-          branch: daily-contribution
-          base: main
-          body: "This pull request was created automatically by a GitHub Actions workflow."
-          token: ${{ secrets.GH_TOKEN }}
+          push: true
