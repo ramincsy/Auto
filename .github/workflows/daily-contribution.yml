@@ -29,7 +29,10 @@ jobs:
 
       # Pull remote changes before commit
       - name: Pull remote changes
-        run: git pull origin main
+        run: |
+          git fetch origin
+          git checkout main
+          git pull origin main
 
       # Commit and push changes
       - name: Commit and Push changes
