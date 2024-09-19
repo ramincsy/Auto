@@ -49,7 +49,7 @@ jobs:
             github.rest.discussions.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              category_id: '3',  # Replace with your discussion category ID
+              category_id: '4',  # Replace with your discussion category ID
               title: `Daily Discussion: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}`,
               body: 'What\'s your favorite programming language and why?'
             })
