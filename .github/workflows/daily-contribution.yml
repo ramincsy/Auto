@@ -22,57 +22,61 @@ jobs:
       - name: Get current date info
         id: date
         run: |
-          echo "day=$(date +'%d')" >> $GITHUB_ENV
-          echo "month=$(date +'%m')" >> $GITHUB_ENV
-          echo "year=$(date +'%Y')" >> $GITHUB_ENV
+          echo "day=$(date +'%d')" >> $GITHUB_OUTPUT
+          echo "month=$(date +'%m')" >> $GITHUB_OUTPUT
+          echo "year=$(date +'%Y')" >> $GITHUB_OUTPUT
 
       - name: Generate daily content
         run: |
           python -c "
           import random
+          import os  # Import os to use environment variables
           
           def generate_content():
               topics = ['AI', 'Machine Learning', 'Data Science', 'Web Development', 'Cloud Computing']
               return f'Daily study topic: {random.choice(topics)}'
           
+          # Open the README.md file and append the content
           with open('README.md', 'a') as f:
+              # Write the header for today's contribution
               f.write(f'\n\n## Contribution for {os.getenv('year')}-{os.getenv('month')}-{os.getenv('day')}\n')
+              # Add a line for each day of the month so far
               for i in range(int(os.getenv('day'))):
                   f.write(f'- {generate_content()}\n')
           "
 
       - name: Create directory structure and new file
         run: |
-          mkdir -p "updates/${{ env.year }}/${{ env.month }}"
-          echo "Daily update for ${{ env.year }}-${{ env.month }}-${{ env.day }}" > "updates/${{ env.year }}/${{ env.month }}/${{ env.day }}.md"
+          mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
+          echo "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
 
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
         with:
           author_name: "ramincsy"
           author_email: "ramincsy2@gmail.com"
-          message: "Daily contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
+          message: "Daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
           add: "README.md updates/"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          branch: daily-contribution-${{ env.year }}-${{ env.month }}-${{ env.day }}
+          branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
           github_token: ${{ secrets.GH_TOKEN }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GH_TOKEN }}
-          commit-message: "Daily contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
-          title: "Daily Contribution: ${{ env.year }}-${{ env.month }}-${{ env.day }}"
+          commit-message: "Daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
+          title: "Daily Contribution: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
           body: |
-            This pull request was automatically generated to add the daily contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}.
+            This pull request was automatically generated to add the daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}.
             
             Changes include:
             - Updated README.md with new daily topics
             - Created a new file for today's update
-          branch: daily-contribution-${{ env.year }}-${{ env.month }}-${{ env.day }}
+          branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
           base: main
 
       - name: Create Issue
@@ -83,6 +87,6 @@ jobs:
             github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Daily Contribution Report: ${{ env.year }}-${{ env.month }}-${{ env.day }}`,
+              title: `Daily Contribution Report: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}`,
               body: 'A new daily contribution has been made. Please review the latest pull request.'
             })
