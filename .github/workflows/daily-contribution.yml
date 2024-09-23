@@ -27,23 +27,35 @@ jobs:
           echo "year=$(date +'%Y')" >> $GITHUB_OUTPUT
 
       - name: Generate daily content
-        run: |
-          python -c "
-          import random
-          import os  # Import os to use environment variables
-          
-          def generate_content():
-              topics = ['AI', 'Machine Learning', 'Data Science', 'Web Development', 'Cloud Computing']
-              return f'Daily study topic: {random.choice(topics)}'
-          
-          # Open the README.md file and append the content
-          with open('README.md', 'a') as f:
-              # Write the header for today's contribution
-              f.write(f'\n\n## Contribution for {os.getenv('year')}-{os.getenv('month')}-{os.getenv('day')}\n')
-              # Add a line for each day of the month so far
-              for i in range(int(os.getenv('day'))):
-                  f.write(f'- {generate_content()}\n')
-          "
+  run: |
+    python -c "
+    import random
+    import os
+
+    def generate_content():
+        topics = ['AI', 'Machine Learning', 'Data Science', 'Web Development', 'Cloud Computing']
+        return f'Daily study topic: {random.choice(topics)}'
+
+    # Ensure that environment variables are available
+    day = os.getenv('day')
+    month = os.getenv('month')
+    year = os.getenv('year')
+
+    if day and month and year:
+        # Open the README.md file and append the content
+        with open('README.md', 'a') as f:
+            f.write(f'\n\n## Contribution for {year}-{month}-{day}\n')
+            for i in range(int(day)):
+                f.write(f'- {generate_content()}\n')
+    else:
+        raise ValueError('Date environment variables not set properly.')
+    "
+  shell: /usr/bin/bash -e {0}
+  env:
+    day: ${{ steps.date.outputs.day }}
+    month: ${{ steps.date.outputs.month }}
+    year: ${{ steps.date.outputs.year }}
+
 
       - name: Create directory structure and new file
         run: |
