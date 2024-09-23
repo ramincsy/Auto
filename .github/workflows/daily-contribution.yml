@@ -116,7 +116,8 @@ jobs:
             - Created a new file for today's update
             
             Please review the changes and merge if everything looks good.
-          branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
+          branch: "daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
+          branch-suffix: "timestamp"
           base: main
 
       - name: Create Issue
