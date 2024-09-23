@@ -1,4 +1,5 @@
 name: Enhanced Daily Contributions
+
 on:
   schedule:
     - cron: '0 */12 * * *'  # Run every 12 hours
@@ -53,14 +54,15 @@ jobs:
               subtopic = random.choice(subtopics[topic])
               return f'Daily study topic: {topic} - Focus: {subtopic}'
           
+          # Write contributions to README.md
           with open('README.md', 'a') as f:
-              f.write(f'\n\n## Contribution for {'${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}'}\n')
+              f.write(f'\n\n## Contribution for {{"${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"}}\n')
               for i in range(3):  # Generate 3 topics per day
                   f.write(f'- {generate_content()}\n')
           
           # Generate content for the daily update file
           daily_content = f'''
-          # Daily Update: {'${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}'}
+          # Daily Update: {"${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"}
           
           ## Today's Focus
           {generate_content()}
@@ -79,14 +81,13 @@ jobs:
           - [Resource 3]()
           '''
           
-          with open('updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md', 'w') as f:
+          with open(f'updates/{{{{ steps.date.outputs.year }}}}/{{{{ steps.date.outputs.month }}}}/{{{{ steps.date.outputs.day }}}}.md', 'w') as f:
               f.write(daily_content)
           "
 
-      - name: Create directory structure and new file
+      - name: Create directory structure
         run: |
           mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
-          # The content of this file is now generated in the previous step
 
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
@@ -103,7 +104,7 @@ jobs:
           github_token: ${{ secrets.GH_TOKEN }}
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GH_TOKEN }}
           commit-message: "Daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
@@ -116,8 +117,7 @@ jobs:
             - Created a new file for today's update
             
             Please review the changes and merge if everything looks good.
-          branch: "daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
-          branch-suffix: "timestamp"
+          branch: "daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}"
           base: main
 
       - name: Create Issue
