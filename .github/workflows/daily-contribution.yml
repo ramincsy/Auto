@@ -1,5 +1,4 @@
 name: Enhanced Daily Contributions
-
 on:
   schedule:
     - cron: '0 */12 * * *'  # Run every 12 hours
@@ -19,6 +18,11 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint
+
       - name: Get current date info
         id: date
         run: |
@@ -26,39 +30,63 @@ jobs:
           echo "month=$(date +'%m')" >> $GITHUB_OUTPUT
           echo "year=$(date +'%Y')" >> $GITHUB_OUTPUT
 
+      - name: Check code quality
+        run: |
+          pylint **/*.py || true
+
       - name: Generate daily content
         run: |
           python -c "
           import random
-          import os
-
+          import datetime
+          
           def generate_content():
               topics = ['AI', 'Machine Learning', 'Data Science', 'Web Development', 'Cloud Computing']
-              return f'Daily study topic: {random.choice(topics)}'
-
-          # Ensure that environment variables are available
-          day = os.getenv('day')
-          month = os.getenv('month')
-          year = os.getenv('year')
-
-          if day and month and year:
-              # Open the README.md file and append the content
-              with open('README.md', 'a') as f:
-                  f.write(f'\n\n## Contribution for {year}-{month}-{day}\n')
-                  for i in range(int(day)):
-                      f.write(f'- {generate_content()}\n')
-          else:
-              raise ValueError('Date environment variables not set properly.')
+              subtopics = {
+                  'AI': ['Neural Networks', 'Computer Vision', 'Natural Language Processing'],
+                  'Machine Learning': ['Supervised Learning', 'Unsupervised Learning', 'Reinforcement Learning'],
+                  'Data Science': ['Data Analysis', 'Data Visualization', 'Statistical Modeling'],
+                  'Web Development': ['Frontend', 'Backend', 'Full Stack'],
+                  'Cloud Computing': ['AWS', 'Azure', 'Google Cloud']
+              }
+              topic = random.choice(topics)
+              subtopic = random.choice(subtopics[topic])
+              return f'Daily study topic: {topic} - Focus: {subtopic}'
+          
+          with open('README.md', 'a') as f:
+              f.write(f'\n\n## Contribution for {'${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}'}\n')
+              for i in range(3):  # Generate 3 topics per day
+                  f.write(f'- {generate_content()}\n')
+          
+          # Generate content for the daily update file
+          daily_content = f'''
+          # Daily Update: {'${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}'}
+          
+          ## Today's Focus
+          {generate_content()}
+          
+          ## Progress
+          - [ ] Study for 2 hours
+          - [ ] Complete one coding challenge
+          - [ ] Review yesterday's material
+          
+          ## Notes
+          (Add your study notes here)
+          
+          ## Resources
+          - [Resource 1]()
+          - [Resource 2]()
+          - [Resource 3]()
+          '''
+          
+          with open('updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md', 'w') as f:
+              f.write(daily_content)
           "
-        env:
-          day: ${{ steps.date.outputs.day }}
-          month: ${{ steps.date.outputs.month }}
-          year: ${{ steps.date.outputs.year }}
 
       - name: Create directory structure and new file
         run: |
           mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
-          echo "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
+          # The content of this file is now generated in the previous step
 
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
@@ -86,6 +114,8 @@ jobs:
             Changes include:
             - Updated README.md with new daily topics
             - Created a new file for today's update
+            
+            Please review the changes and merge if everything looks good.
           branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
           base: main
 
@@ -98,5 +128,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `Daily Contribution Report: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}`,
-              body: 'A new daily contribution has been made. Please review the latest pull request.'
+              body: 'A new daily contribution has been made. Please review the latest pull request and update your progress.'
             })
