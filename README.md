@@ -1990,3 +1990,8 @@ Contribution 19 on day 19
 
 ## Contribution for 2024-11-01
 - Daily study topic: Web Development
+
+
+## Contribution for 2024-11-02
+- Daily study topic: Data Science
+- Daily study topic: Cloud Computing
