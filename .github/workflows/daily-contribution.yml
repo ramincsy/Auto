@@ -46,19 +46,15 @@ jobs:
           mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
           echo "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
 
-      - name: Commit changes
-        uses: EndBug/add-and-commit@v9
+      - name: Commit and Push changes
+        uses: devops-infra/action-commit-push@master
         with:
-          author_name: "ramincsy"
-          author_email: "ramincsy2@gmail.com"
-          message: "Daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
-          add: "README.md updates/"
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
           github_token: ${{ secrets.GH_TOKEN }}
+          add_timestamp: true
+          commit_prefix: "[AUTO-COMMIT]"
+          commit_message: "Daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
+          target_branch: "daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}"
+          force: true
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
@@ -72,7 +68,7 @@ jobs:
             Changes include:
             - Updated README.md with new daily topics
             - Created a new file for today's update
-          branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
+          branch: "daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}"
           base: main
 
       - name: Create Issue
