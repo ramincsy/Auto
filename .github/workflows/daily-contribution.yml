@@ -1,46 +1,90 @@
 name: Enhanced Daily Contributions
+
 on:
   schedule:
-    - cron: '0 */12 * * *'
-  workflow_dispatch:
+    - cron: '0 0 * * *' # اجرا هر روز ساعت 00:00 UTC
+  workflow_dispatch: # قابلیت اجرای دستی
 
 jobs:
-  make-contribution:
+  daily-contribution:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # دریافت کامل تاریخچه مخزن
 
-      - name: Get current date info
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Get Current Date
         id: date
         run: |
-          echo "day=$(date +'%d')" >> $GITHUB_OUTPUT
-          echo "month=$(date +'%m')" >> $GITHUB_OUTPUT
-          echo "year=$(date +'%Y')" >> $GITHUB_OUTPUT
+          echo "day=$(date +'%d')" >> $GITHUB_ENV
+          echo "month=$(date +'%m')" >> $GITHUB_ENV
+          echo "year=$(date +'%Y')" >> $GITHUB_ENV
 
-      - name: Generate daily content
+      - name: Generate Daily Content
         run: |
-          #!/bin/bash
-          topics=(
-            "AI and Machine Learning" 
-            "Cloud Computing Strategies" 
-            "Web Development Trends" 
-            "Data Science Techniques" 
-            "Cybersecurity Best Practices"
-          )
+          python -c "
+import random
 
-          current_date=$(date +'%Y-%m-%d')
-          day_number=$(date +'%d')
+def generate_content():
+    topics = ['AI', 'Machine Learning', 'Data Science', 'Web Development', 'Cloud Computing']
+    return f'Daily study topic: {random.choice(topics)}'
 
-          echo -e "\n\n## Contribution for $current_date" >> README.md
+date = '${{ env.year }}-${{ env.month }}-${{ env.day }}'
+content = f'## Contribution for {date}\\n\\n'
+content += '\\n'.join([f'- {generate_content()}' for _ in range(int('${{ env.day }}'))])
 
-          for ((i=1; i<=day_number; i++)); do
-            random_topic=${topics[$RANDOM % ${#topics[@]}]}
-            echo "- Daily study topic: $random_topic" >> README.md
-          done
+with open('README.md', 'a') as f:
+    f.write(f'\\n{content}\\n')
+          "
 
-      # [باقی مراحل مشابه نسخه قبل]
+      - name: Create Directory and File for Update
+        run: |
+          mkdir -p "updates/${{ env.year }}/${{ env.month }}"
+          echo "Daily update for ${{ env.year }}-${{ env.month }}-${{ env.day }}" > "updates/${{ env.year }}/${{ env.month }}/${{ env.day }}.md"
+
+      - name: Commit Changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: "Ramin"
+          author_email: "ramincsy2@gmail.com"
+          message: "Daily contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
+          add: "README.md updates/"
+
+      - name: Push Changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: main
+          github_token: ${{ secrets.GH_TOKEN }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          commit-message: "Daily contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
+          title: "Daily Contribution: ${{ env.year }}-${{ env.month }}-${{ env.day }}"
+          body: |
+            این درخواست به صورت خودکار ایجاد شده است تا مشارکت روزانه شما را اضافه کند.
+
+            تغییرات شامل:
+            - به‌روزرسانی فایل README.md
+            - ایجاد یک فایل جدید برای گزارش روز
+          branch: daily-contribution-${{ env.year }}-${{ env.month }}
+          base: main
+
+      - name: Create Issue
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Daily Contribution Report: ${{ env.year }}-${{ env.month }}-${{ env.day }}`,
+              body: 'A new daily contribution has been made. Please review the latest pull request.'
+            })
