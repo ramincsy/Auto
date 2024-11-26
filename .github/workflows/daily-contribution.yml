@@ -52,12 +52,10 @@ jobs:
           git status --porcelain
           echo "local_changes=$(git status --porcelain | wc -l)" >> $GITHUB_ENV
 
-      - name: Commit local changes if any
+      - name: Stash local changes if any (skip if no changes)
         if: env.local_changes != '0'
         run: |
-          git add .
-          git commit -m "Committing local changes before pulling"
-          git push origin main
+          git stash --include-untracked
 
       - name: Pull latest changes from remote
         run: |
