@@ -46,19 +46,24 @@ jobs:
           mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
           echo "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
 
-      - name: Stash changes to prevent overwriting
+      - name: Check for local changes
+        id: check_changes
         run: |
-          git stash save "Stashing local changes before pulling"
-      
+          git status --porcelain
+          echo "local_changes=$(git status --porcelain | wc -l)" >> $GITHUB_ENV
+
+      - name: Commit local changes if any
+        if: env.local_changes != '0'
+        run: |
+          git add .
+          git commit -m "Committing local changes before pulling"
+          git push origin main
+
       - name: Pull latest changes from remote
         run: |
           git fetch origin
           git checkout main
           git pull origin main
-
-      - name: Apply stashed changes
-        run: |
-          git stash pop  # Apply stashed changes after pulling
 
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
