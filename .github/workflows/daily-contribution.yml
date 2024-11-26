@@ -46,12 +46,18 @@ jobs:
           mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
           echo "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
 
+      - name: Stash changes to prevent overwriting
+        run: |
+          git stash save "Stashing local changes before pulling"
+      
       - name: Pull latest changes from remote
         run: |
           git fetch origin
           git checkout main
-          git stash save "Saving local changes before pull"
           git pull origin main
+
+      - name: Apply stashed changes
+        run: |
           git stash pop  # Apply stashed changes after pulling
 
       - name: Commit changes
