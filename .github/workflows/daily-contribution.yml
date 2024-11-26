@@ -50,7 +50,9 @@ jobs:
         run: |
           git fetch origin
           git checkout main
+          git stash save "Saving local changes before pull"
           git pull origin main
+          git stash pop  # Apply stashed changes after pulling
 
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
