@@ -13,7 +13,7 @@ jobs:
       issues: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # به روزترین نسخه
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -30,21 +30,31 @@ jobs:
           echo "year=$(date +'%Y')" >> $GITHUB_OUTPUT
 
       - name: Generate daily content
-  run: |
-    python -c "
+        run: |
+          python3 << EOF
 import random
+from datetime import datetime
 
 def generate_content():
-    topics = ['AI', 'Machine Learning', 'Data Science', 'Web Development', 'Cloud Computing']
-    return f'Daily study topic: {random.choice(topics)}'
+    topics = [
+        "AI and Machine Learning", 
+        "Cloud Computing Strategies", 
+        "Web Development Trends", 
+        "Data Science Techniques", 
+        "Cybersecurity Best Practices"
+    ]
+    return f"Daily study topic: {random.choice(topics)}"
 
-with open('README.md', 'a') as f:
-    f.write(f'\n\n## Contribution for {\"${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}\"}\\n')
-    for i in range(int('${{ steps.date.outputs.day }}')):
-        f.write(f'- {generate_content()}\\n')
-"
+current_date = datetime.now().strftime("%Y-%m-%d")
+day_number = int(datetime.now().strftime("%d"))
 
-      - name: Create directory structure and new file
+with open("README.md", "a") as f:
+    f.write(f"\n\n## Contribution for {current_date}\n")
+    for _ in range(day_number):
+        f.write(f"- {generate_content()}\n")
+EOF
+
+      - name: Create directory structure and file
         run: |
           mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
           echo "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
@@ -70,9 +80,7 @@ with open('README.md', 'a') as f:
           commit-message: "Daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
           title: "Daily Contribution: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
           body: |
-            This pull request was automatically generated to add the daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}.
-            
-            Changes include:
+            Automated daily contribution:
             - Updated README.md with new daily topics
             - Created a new file for today's update
           branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
@@ -87,5 +95,5 @@ with open('README.md', 'a') as f:
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `Daily Contribution Report: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}`,
-              body: 'A new daily contribution has been made. Please review the latest pull request.'
+              body: 'A new daily contribution has been generated and is ready for review.'
             })
