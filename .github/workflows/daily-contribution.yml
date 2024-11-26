@@ -1,14 +1,6 @@
-name: Daily Update Workflow
-
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * *' # اجرا هر روز در ساعت 12:00 شب
-
 jobs:
   daily-update:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -18,35 +10,26 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-      - name: Get current date
-        id: date
+      - name: Create new branch
         run: |
-          echo "year=$(date +'%Y')" >> $GITHUB_ENV
-          echo "month=$(date +'%m')" >> $GITHUB_ENV
-          echo "day=$(date +'%d')" >> $GITHUB_ENV
+          git checkout -b daily-updates-$(date +'%Y-%m-%d')
 
       - name: Make changes
         run: |
-          # اضافه کردن تغییرات یا دستورات لازم در این بخش
           echo "Daily update $(date)" > daily_update.txt
           git add .
-          git commit -m "Daily update for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
-
-      - name: Create new branch
-        run: |
-          git checkout -b daily-updates-${{ env.year }}-${{ env.month }}-${{ env.day }}
+          git commit -m "Daily update for $(date +'%Y-%m-%d')"
 
       - name: Push changes to new branch
-        run: |
-          git push origin daily-updates-${{ env.year }}-${{ env.month }}-${{ env.day }}
+        run: git push origin daily-updates-$(date +'%Y-%m-%d')
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Daily update for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
-          title: "Daily Update: ${{ env.year }}-${{ env.month }}-${{ env.day }}"
-          branch: daily-updates-${{ env.year }}-${{ env.month }}-${{ env.day }}
+          commit-message: "Daily update for $(date +'%Y-%m-%d')"
+          title: "Daily Update: $(date +'%Y-%m-%d')"
+          branch: daily-updates-$(date +'%Y-%m-%d')
           base: main
           body: |
-            This pull request includes the daily updates made on ${{ env.year }}-${{ env.month }}-${{ env.day }}.
+            This pull request includes daily updates made on $(date +'%Y-%m-%d').
