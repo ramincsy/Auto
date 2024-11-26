@@ -46,23 +46,6 @@ jobs:
           mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
           echo "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
 
-      - name: Check for local changes
-        id: check_changes
-        run: |
-          git status --porcelain
-          echo "local_changes=$(git status --porcelain | wc -l)" >> $GITHUB_ENV
-
-      - name: Stash local changes if any
-        if: env.local_changes != '0'
-        run: |
-          git stash --include-untracked
-
-      - name: Pull latest changes from remote
-        run: |
-          git fetch origin
-          git checkout main
-          git pull origin main
-
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
         with:
@@ -72,8 +55,10 @@ jobs:
           add: "README.md updates/"
 
       - name: Push changes
-        run: |
-          git push origin main
+        uses: ad-m/github-push-action@master
+        with:
+          branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
+          github_token: ${{ secrets.GH_TOKEN }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
