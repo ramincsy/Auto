@@ -1,4 +1,4 @@
-name: Enhanced Daily Contributions
+name: Daily Contributions
 
 on:
   schedule:
@@ -63,30 +63,3 @@ jobs:
       - name: Push changes
         run: |
           git push origin main
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          commit-message: "Daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
-          title: "Daily Contribution: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
-          body: |
-            This pull request was automatically generated to add the daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}.
-            
-            Changes include:
-            - Updated README.md with new daily topics
-            - Created a new file for today's update
-          branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
-          base: main
-
-      - name: Create Issue
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GH_TOKEN }}
-          script: |
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `Daily Contribution Report: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}`,
-              body: 'A new daily contribution has been made. Please review the latest pull request.'
-            })
