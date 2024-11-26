@@ -1,5 +1,4 @@
 name: Enhanced Daily Contributions
-
 on:
   schedule:
     - cron: '0 */12 * * *'  # Run every 12 hours
@@ -8,16 +7,20 @@ on:
 jobs:
   make-contribution:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # به روزترین نسخه
         with:
-          fetch-depth: 0  # Fetch all history for all branches and tags
+          fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.11'
 
       - name: Get current date info
         id: date
@@ -28,18 +31,18 @@ jobs:
 
       - name: Generate daily content
         run: |
-          python -c "
+          python -c '
           import random
           
           def generate_content():
-              topics = ['AI', 'Machine Learning', 'Data Science', 'Web Development', 'Cloud Computing']
-              return f'Daily study topic: {random.choice(topics)}'
+              topics = ["AI", "Machine Learning", "Data Science", "Web Development", "Cloud Computing"]
+              return f"Daily study topic: {random.choice(topics)}"
           
-          with open('README.md', 'a') as f:
-              f.write(f'\n\n## Contribution for {'${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}'}\n')
-              for i in range(int('${{ steps.date.outputs.day }}')):
-                  f.write(f'- {generate_content()}\n')
-          "
+          with open("README.md", "a") as f:
+              f.write(f"\n\n## Contribution for {'"${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"}\n")
+              for i in range(int("${{ steps.date.outputs.day }}")):
+                  f.write(f"- {generate_content()}\n")
+          '
 
       - name: Create directory structure and new file
         run: |
