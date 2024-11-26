@@ -41,16 +41,11 @@ jobs:
                   f.write(f'- {generate_content()}\n')
           "
 
-      - name: Create directory structure and new file
-        run: |
-          mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
-          echo "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
-
       - name: Pull latest changes from remote
         run: |
           git fetch origin
           git checkout main
-          git pull origin main
+          git pull origin main  # Pull latest changes
 
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
