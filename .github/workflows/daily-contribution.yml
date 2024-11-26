@@ -46,6 +46,10 @@ jobs:
           mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
           echo "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
 
+      - name: Pull latest changes
+        run: |
+          git pull origin main --rebase
+
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
         with:
