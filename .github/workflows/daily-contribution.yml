@@ -1,8 +1,8 @@
 name: Enhanced Daily Contributions
 on:
   schedule:
-    - cron: '0 */12 * * *'  # Run every 12 hours
-  workflow_dispatch:  # Allow manual trigger
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
 
 jobs:
   make-contribution:
@@ -14,13 +14,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
 
       - name: Get current date info
         id: date
@@ -31,69 +24,23 @@ jobs:
 
       - name: Generate daily content
         run: |
-          python3 << EOF
-import random
-from datetime import datetime
+          #!/bin/bash
+          topics=(
+            "AI and Machine Learning" 
+            "Cloud Computing Strategies" 
+            "Web Development Trends" 
+            "Data Science Techniques" 
+            "Cybersecurity Best Practices"
+          )
 
-def generate_content():
-    topics = [
-        "AI and Machine Learning", 
-        "Cloud Computing Strategies", 
-        "Web Development Trends", 
-        "Data Science Techniques", 
-        "Cybersecurity Best Practices"
-    ]
-    return f"Daily study topic: {random.choice(topics)}"
+          current_date=$(date +'%Y-%m-%d')
+          day_number=$(date +'%d')
 
-current_date = datetime.now().strftime("%Y-%m-%d")
-day_number = int(datetime.now().strftime("%d"))
+          echo -e "\n\n## Contribution for $current_date" >> README.md
 
-with open("README.md", "a") as f:
-    f.write(f"\n\n## Contribution for {current_date}\n")
-    for _ in range(day_number):
-        f.write(f"- {generate_content()}\n")
-EOF
+          for ((i=1; i<=day_number; i++)); do
+            random_topic=${topics[$RANDOM % ${#topics[@]}]}
+            echo "- Daily study topic: $random_topic" >> README.md
+          done
 
-      - name: Create directory structure and file
-        run: |
-          mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
-          echo "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
-
-      - name: Commit changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          author_name: "ramincsy"
-          author_email: "ramincsy2@gmail.com"
-          message: "Daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
-          add: "README.md updates/"
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
-          github_token: ${{ secrets.GH_TOKEN }}
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          commit-message: "Daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
-          title: "Daily Contribution: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
-          body: |
-            Automated daily contribution:
-            - Updated README.md with new daily topics
-            - Created a new file for today's update
-          branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
-          base: main
-
-      - name: Create Issue
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GH_TOKEN }}
-          script: |
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `Daily Contribution Report: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}`,
-              body: 'A new daily contribution has been generated and is ready for review.'
-            })
+      # [باقی مراحل مشابه نسخه قبل]
