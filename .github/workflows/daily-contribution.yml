@@ -54,9 +54,10 @@ jobs:
           message: "Daily contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
           add: "README.md updates/"
 
-      - name: Push changes with --force
+      - name: Push changes to new branch
         run: |
-          git push --force origin daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
+          git checkout -b daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}
+          git push --force origin daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
@@ -70,7 +71,7 @@ jobs:
             Changes include:
             - Updated README.md with new daily topics
             - Created a new file for today's update
-          branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
+          branch: daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}
           base: main
 
       - name: Create Issue
