@@ -1,61 +1,52 @@
-name: Daily Contributions
+name: Daily Update Workflow
 
 on:
-  schedule:
-    - cron: '0 0 * * *' # Run every day at midnight
   workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *' # اجرا هر روز در ساعت 12:00 شب
 
 jobs:
-  make-contribution:
+  daily-update:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
-      - name: Get current date info
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Get current date
         id: date
         run: |
-          echo "day=$(date +'%d')" >> $GITHUB_OUTPUT
-          echo "month=$(date +'%m')" >> $GITHUB_OUTPUT
-          echo "year=$(date +'%Y')" >> $GITHUB_OUTPUT
+          echo "year=$(date +'%Y')" >> $GITHUB_ENV
+          echo "month=$(date +'%m')" >> $GITHUB_ENV
+          echo "day=$(date +'%d')" >> $GITHUB_ENV
 
-      - name: Update README
+      - name: Make changes
         run: |
-          echo -e "\n## Contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" >> README.md
+          # اضافه کردن تغییرات یا دستورات لازم در این بخش
+          echo "Daily update $(date)" > daily_update.txt
+          git add .
+          git commit -m "Daily update for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
 
-      - name: Create directory and file
+      - name: Create new branch
         run: |
-          mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
-          echo "Update log for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
+          git checkout -b daily-updates-${{ env.year }}-${{ env.month }}-${{ env.day }}
 
-      - name: Pull latest changes
+      - name: Push changes to new branch
         run: |
-          git config user.name "ramincsy"
-          git config user.email "ramincsy2@gmail.com"
-          git pull origin main --rebase
-
-      - name: Commit changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          author_name: "ramincsy"
-          author_email: "ramincsy2@gmail.com"
-          message: "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
-          add: "README.md updates/"
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          branch: daily-updates-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
-          github_token: ${{ secrets.GH_TOKEN }}
+          git push origin daily-updates-${{ env.year }}-${{ env.month }}-${{ env.day }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.GH_TOKEN }}
-          commit-message: "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
-          title: "Daily Update: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
-          body: "Automated update for daily log."
-          branch: daily-updates-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Daily update for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
+          title: "Daily Update: ${{ env.year }}-${{ env.month }}-${{ env.day }}"
+          branch: daily-updates-${{ env.year }}-${{ env.month }}-${{ env.day }}
           base: main
+          body: |
+            This pull request includes the daily updates made on ${{ env.year }}-${{ env.month }}-${{ env.day }}.
