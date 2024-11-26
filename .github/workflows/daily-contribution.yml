@@ -1,90 +1,55 @@
-name: Enhanced Daily Contributions
+name: Daily Contributions
 
 on:
   schedule:
-    - cron: '0 0 * * *' # اجرا هر روز ساعت 00:00 UTC
-  workflow_dispatch: # قابلیت اجرای دستی
+    - cron: '0 0 * * *' # Run every day at midnight
+  workflow_dispatch:
 
 jobs:
-  daily-contribution:
+  make-contribution:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # دریافت کامل تاریخچه مخزن
+          fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
-      - name: Get Current Date
+      - name: Get current date info
         id: date
         run: |
-          echo "day=$(date +'%d')" >> $GITHUB_ENV
-          echo "month=$(date +'%m')" >> $GITHUB_ENV
-          echo "year=$(date +'%Y')" >> $GITHUB_ENV
+          echo "day=$(date +'%d')" >> $GITHUB_OUTPUT
+          echo "month=$(date +'%m')" >> $GITHUB_OUTPUT
+          echo "year=$(date +'%Y')" >> $GITHUB_OUTPUT
 
-      - name: Generate Daily Content
+      - name: Update README
         run: |
-          python -c "
-import random
+          echo -e "\n## Contribution for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" >> README.md
 
-def generate_content():
-    topics = ['AI', 'Machine Learning', 'Data Science', 'Web Development', 'Cloud Computing']
-    return f'Daily study topic: {random.choice(topics)}'
-
-date = '${{ env.year }}-${{ env.month }}-${{ env.day }}'
-content = f'## Contribution for {date}\\n\\n'
-content += '\\n'.join([f'- {generate_content()}' for _ in range(int('${{ env.day }}'))])
-
-with open('README.md', 'a') as f:
-    f.write(f'\\n{content}\\n')
-          "
-
-      - name: Create Directory and File for Update
+      - name: Create directory and file
         run: |
-          mkdir -p "updates/${{ env.year }}/${{ env.month }}"
-          echo "Daily update for ${{ env.year }}-${{ env.month }}-${{ env.day }}" > "updates/${{ env.year }}/${{ env.month }}/${{ env.day }}.md"
+          mkdir -p "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}"
+          echo "Update log for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}" > "updates/${{ steps.date.outputs.year }}/${{ steps.date.outputs.month }}/${{ steps.date.outputs.day }}.md"
 
-      - name: Commit Changes
+      - name: Commit changes
         uses: EndBug/add-and-commit@v9
         with:
-          author_name: "Ramin"
+          author_name: "ramincsy"
           author_email: "ramincsy2@gmail.com"
-          message: "Daily contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
+          message: "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
           add: "README.md updates/"
 
-      - name: Push Changes
+      - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          branch: main
+          branch: daily-updates-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
           github_token: ${{ secrets.GH_TOKEN }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GH_TOKEN }}
-          commit-message: "Daily contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
-          title: "Daily Contribution: ${{ env.year }}-${{ env.month }}-${{ env.day }}"
-          body: |
-            این درخواست به صورت خودکار ایجاد شده است تا مشارکت روزانه شما را اضافه کند.
-
-            تغییرات شامل:
-            - به‌روزرسانی فایل README.md
-            - ایجاد یک فایل جدید برای گزارش روز
-          branch: daily-contribution-${{ env.year }}-${{ env.month }}
+          commit-message: "Daily update for ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
+          title: "Daily Update: ${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}"
+          body: "Automated update for daily log."
+          branch: daily-updates-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}
           base: main
-
-      - name: Create Issue
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GH_TOKEN }}
-          script: |
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `Daily Contribution Report: ${{ env.year }}-${{ env.month }}-${{ env.day }}`,
-              body: 'A new daily contribution has been made. Please review the latest pull request.'
-            })
