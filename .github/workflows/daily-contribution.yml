@@ -48,6 +48,8 @@ jobs:
 
       - name: Pull latest changes
         run: |
+          git fetch origin
+          git checkout main
           git pull origin main --rebase
 
       - name: Commit changes
@@ -61,7 +63,7 @@ jobs:
       - name: Push changes to new branch
         run: |
           git checkout -b daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}
-          git push --force origin daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}
+          git push --force-with-lease origin daily-contribution-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
