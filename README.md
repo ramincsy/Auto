@@ -3126,3 +3126,8 @@ Contribution 19 on day 19
 ## Contribution for 2024-12-02
 - Daily study topic: Machine Learning
 - Daily study topic: Machine Learning
+
+
+## Contribution for 2024-12-02
+- Daily study topic: Cloud Computing
+- Daily study topic: Web Development
