@@ -26,7 +26,7 @@ jobs:
           echo "month=$(date +'%m')" >> $GITHUB_ENV
           echo "year=$(date +'%Y')" >> $GITHUB_ENV
 
-      - name: Generate daily content
+            - name: Generate daily content
         run: |
           python -c "
 import random
@@ -36,12 +36,13 @@ def generate_content():
     topics = ['AI', 'Machine Learning', 'Data Science', 'Web Development', 'Cloud Computing']
     return f'Daily study topic: {random.choice(topics)}'
 
-date_string = f'{os.getenv('year')}-{os.getenv('month')}-{os.getenv('day')}'
+date_string = f\"{os.getenv('year')}-{os.getenv('month')}-{os.getenv('day')}\"
 with open('README.md', 'a') as f:
-    f.write(f'\n\n## Contribution for {date_string}\n')
+    f.write(f\"\\n\\n## Contribution for {date_string}\\n\")
     for i in range(int(os.getenv('day'))):
-        f.write(f'- {generate_content()}\n')
+        f.write(f\"- {generate_content()}\\n\")
 "
+
 
       - name: Create directory structure and new file
         run: |
