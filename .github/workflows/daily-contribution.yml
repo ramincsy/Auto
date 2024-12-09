@@ -9,30 +9,34 @@ jobs:
   make-contribution:
     runs-on: ubuntu-latest
     steps:
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
+      # 2. Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
+      # 3. Set environment variables for the current date
       - name: Get current date info
         run: |
           echo "day=$(date +'%d')" >> $GITHUB_ENV
           echo "month=$(date +'%m')" >> $GITHUB_ENV
           echo "year=$(date +'%Y')" >> $GITHUB_ENV
 
-      - name: Run Python script
+      # 4. Run the Python script to generate daily content
+      - name: Generate daily content
         run: python generate_content.py
 
-      - name: Configure git for HTTPS
-        run: |
-          git config --global user.email "your-email@example.com"
-          git config --global user.name "Your GitHub Username"
+      # 5. Pull the latest changes to avoid conflicts
+      - name: Pull latest changes
+        run: git pull origin master --rebase
 
+      # 6. Commit changes
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
         with:
@@ -41,11 +45,14 @@ jobs:
           message: "Automated daily contribution 🚀"
           add: "README.md"
 
+      # 7. Push changes
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GH_TOKEN }}
+          force: false  # Change to true if you want to force push
 
+      # 8. Create Pull Request
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
