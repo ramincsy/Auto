@@ -1,89 +1,39 @@
-name: Enhanced Daily Contributions
+name: Close All Issues
 
 on:
-  schedule:
-    - cron: '0 */12 * * *'  # Run every 12 hours
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:  # Run manually
 
 jobs:
-  make-contribution:
+  close-issues:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout repository
+      # Step 1: Checkout repository
       - name: Checkout code
         uses: actions/checkout@v3
+
+      # Step 2: Close all open issues
+      - name: Close all issues
+        uses: actions/github-script@v6
         with:
-          fetch-depth: 0
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const { data: issues } = await github.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+            });
 
-      # 2. Set up environment
-      - name: Get current date
-        id: date
-        run: |
-          echo "YEAR=$(date +'%Y')" >> $GITHUB_ENV
-          echo "MONTH=$(date +'%m')" >> $GITHUB_ENV
-          echo "DAY=$(date +'%d')" >> $GITHUB_ENV
+            if (issues.length === 0) {
+              console.log("No open issues found.");
+              return;
+            }
 
-      # 3. Generate content and update files
-      - name: Generate content and update files
-        run: |
-          YEAR=${{ env.YEAR }}
-          MONTH=${{ env.MONTH }}
-          DAY=${{ env.DAY }}
-
-          # Generate content
-          echo "Generating content for $YEAR-$MONTH-$DAY..."
-          TOPICS=("AI" "Machine Learning" "Data Science" "Web Development" "Cloud Computing")
-          CONTENT="## Contribution for $YEAR-$MONTH-$DAY\n"
-          for ((i=1; i<=DAY; i++)); do
-            CONTENT+="- Daily study topic: ${TOPICS[RANDOM % ${#TOPICS[@]}]}\n"
-          done
-          echo -e "$CONTENT" >> README.md
-
-          # Create directory structure
-          mkdir -p updates/$YEAR/$MONTH
-          echo "Daily update for $YEAR-$MONTH-$DAY" > updates/$YEAR/$MONTH/$DAY.md
-
-      # 4. Commit and push changes
-      - name: Commit and push changes
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          YEAR=${{ env.YEAR }}
-          MONTH=${{ env.MONTH }}
-          BRANCH="daily-contribution-$YEAR-$MONTH"
-
-          # Configure Git
-          git config --global user.name "ramincsy"
-          git config --global user.email "ramincsy2@gmail.com"
-
-          # Check branch existence
-          git fetch origin
-          if git show-ref --verify --quiet refs/heads/$BRANCH; then
-            git checkout $BRANCH
-            git pull origin $BRANCH --rebase
-          else
-            git checkout -b $BRANCH
-          fi
-
-          # Commit changes
-          git add README.md updates/
-          git commit -m "Daily contribution for $YEAR-$MONTH-$DAY" || echo "Nothing to commit"
-
-          # Push changes
-          git push origin $BRANCH --force-with-lease
-
-      # 5. Create Pull Request
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          commit-message: "Daily contribution for ${{ env.YEAR }}-${{ env.MONTH }}-${{ env.DAY }}"
-          title: "Daily Contribution: ${{ env.YEAR }}-${{ env.MONTH }}-${{ env.DAY }}"
-          body: |
-            This pull request was automatically generated to add the daily contribution for ${{ env.YEAR }}-${{ env.MONTH }}-${{ env.DAY }}.
-            
-            Changes include:
-            - Updated README.md with new daily topics
-            - Created a new file for today's update
-          branch: daily-contribution-${{ env.YEAR }}-${{ env.MONTH }}
-          base: main
+            for (const issue of issues) {
+              await github.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: "closed",
+              });
+              console.log(`Closed issue #${issue.number}: ${issue.title}`);
+            }
