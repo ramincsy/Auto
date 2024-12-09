@@ -9,142 +9,81 @@ jobs:
   make-contribution:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout repository
+      # 1. Checkout repository
       - name: Checkout code
         uses: actions/checkout@v3
-
-      # Step 2: Set up Node.js
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          fetch-depth: 0
 
-      # Step 3: Install dependencies
-      - name: Install dependencies
-        run: npm install octokit fs-extra
+      # 2. Set up environment
+      - name: Get current date
+        id: date
+        run: |
+          echo "YEAR=$(date +'%Y')" >> $GITHUB_ENV
+          echo "MONTH=$(date +'%m')" >> $GITHUB_ENV
+          echo "DAY=$(date +'%d')" >> $GITHUB_ENV
 
-      # Step 4: Run Node.js script for daily contributions
-      - name: Generate daily contributions
+      # 3. Generate content and update files
+      - name: Generate content and update files
+        run: |
+          YEAR=${{ env.YEAR }}
+          MONTH=${{ env.MONTH }}
+          DAY=${{ env.DAY }}
+
+          # Generate content
+          echo "Generating content for $YEAR-$MONTH-$DAY..."
+          TOPICS=("AI" "Machine Learning" "Data Science" "Web Development" "Cloud Computing")
+          CONTENT="## Contribution for $YEAR-$MONTH-$DAY\n"
+          for ((i=1; i<=DAY; i++)); do
+            CONTENT+="- Daily study topic: ${TOPICS[RANDOM % ${#TOPICS[@]}]}\n"
+          done
+          echo -e "$CONTENT" >> README.md
+
+          # Create directory structure
+          mkdir -p updates/$YEAR/$MONTH
+          echo "Daily update for $YEAR-$MONTH-$DAY" > updates/$YEAR/$MONTH/$DAY.md
+
+      # 4. Commit and push changes
+      - name: Commit and push changes
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          node <<EOF
-          const { Octokit } = require("@octokit/rest");
-          const fs = require("fs-extra");
-          const path = require("path");
+          YEAR=${{ env.YEAR }}
+          MONTH=${{ env.MONTH }}
+          BRANCH="daily-contribution-$YEAR-$MONTH"
 
-          const token = process.env.GH_TOKEN;
-          const octokit = new Octokit({ auth: token });
+          # Configure Git
+          git config --global user.name "ramincsy"
+          git config --global user.email "ramincsy2@gmail.com"
 
-          async function main() {
-              const date = new Date();
-              const year = date.getFullYear();
-              const month = String(date.getMonth() + 1).padStart(2, "0");
-              const day = String(date.getDate()).padStart(2, "0");
+          # Check branch existence
+          git fetch origin
+          if git show-ref --verify --quiet refs/heads/$BRANCH; then
+            git checkout $BRANCH
+            git pull origin $BRANCH --rebase
+          else
+            git checkout -b $BRANCH
+          fi
 
-              const topics = ["AI", "Machine Learning", "Data Science", "Web Development", "Cloud Computing"];
-              const generateContent = () => `Daily study topic: ${topics[Math.floor(Math.random() * topics.length)]}`;
+          # Commit changes
+          git add README.md updates/
+          git commit -m "Daily contribution for $YEAR-$MONTH-$DAY" || echo "Nothing to commit"
 
-              // Update README.md
-              const readmePath = path.join(process.cwd(), "README.md");
-              const readmeContent = fs.existsSync(readmePath) ? fs.readFileSync(readmePath, "utf-8") : "";
-              const newContent = `\n\n## Contribution for ${year}-${month}-${day}\n` +
-                                 Array.from({ length: parseInt(day) }, generateContent).join("\n");
-              fs.writeFileSync(readmePath, readmeContent + newContent);
+          # Push changes
+          git push origin $BRANCH --force-with-lease
 
-              // Create directory structure
-              const updatesDir = path.join(process.cwd(), `updates/${year}/${month}`);
-              fs.ensureDirSync(updatesDir);
-
-              const dailyUpdatePath = path.join(updatesDir, `${day}.md`);
-              fs.writeFileSync(dailyUpdatePath, `Daily update for ${year}-${month}-${day}`);
-
-              console.log("Content generated and files updated.");
-
-              // Commit and push changes
-              const repoOwner = "ramincsy";
-              const repoName = "Auto";
-              const branchName = `daily-contribution-${year}-${month}`;
-              
-              // Get default branch and create a branch if it doesn't exist
-              const { data: repoData } = await octokit.repos.get({ owner: repoOwner, repo: repoName });
-              const baseBranch = repoData.default_branch;
-
-              try {
-                  await octokit.git.getRef({ owner: repoOwner, repo: repoName, ref: `heads/${branchName}` });
-              } catch {
-                  console.log(`Creating branch: ${branchName}`);
-                  const { data: baseRef } = await octokit.git.getRef({ owner: repoOwner, repo: repoName, ref: `heads/${baseBranch}` });
-                  await octokit.git.createRef({
-                      owner: repoOwner,
-                      repo: repoName,
-                      ref: `refs/heads/${branchName}`,
-                      sha: baseRef.object.sha,
-                  });
-              }
-
-              // Commit changes
-              const { data: { sha: latestCommitSha } } = await octokit.repos.getCommit({
-                  owner: repoOwner,
-                  repo: repoName,
-                  ref: `heads/${branchName}`
-              });
-
-              const { data: { sha: latestTreeSha } } = await octokit.git.getCommit({
-                  owner: repoOwner,
-                  repo: repoName,
-                  commit_sha: latestCommitSha,
-              });
-
-              const files = [
-                  { path: "README.md", content: fs.readFileSync(readmePath, "utf-8") },
-                  { path: `updates/${year}/${month}/${day}.md`, content: fs.readFileSync(dailyUpdatePath, "utf-8") },
-              ];
-
-              const tree = await octokit.git.createTree({
-                  owner: repoOwner,
-                  repo: repoName,
-                  base_tree: latestTreeSha,
-                  tree: files.map(file => ({
-                      path: file.path,
-                      mode: "100644",
-                      type: "blob",
-                      content: file.content,
-                  })),
-              });
-
-              const newCommit = await octokit.git.createCommit({
-                  owner: repoOwner,
-                  repo: repoName,
-                  message: `Daily contribution for ${year}-${month}-${day}`,
-                  tree: tree.data.sha,
-                  parents: [latestCommitSha],
-              });
-
-              await octokit.git.updateRef({
-                  owner: repoOwner,
-                  repo: repoName,
-                  ref: `heads/${branchName}`,
-                  sha: newCommit.data.sha,
-              });
-
-              console.log("Changes committed and pushed.");
-
-              // Create pull request
-              await octokit.pulls.create({
-                  owner: repoOwner,
-                  repo: repoName,
-                  head: branchName,
-                  base: baseBranch,
-                  title: `Daily Contribution: ${year}-${month}-${day}`,
-                  body: "This is an automated contribution update.",
-              });
-
-              console.log("Pull request created.");
-          }
-
-          main().catch(err => {
-              console.error(err);
-              process.exit(1);
-          });
-          EOF
+      # 5. Create Pull Request
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          commit-message: "Daily contribution for ${{ env.YEAR }}-${{ env.MONTH }}-${{ env.DAY }}"
+          title: "Daily Contribution: ${{ env.YEAR }}-${{ env.MONTH }}-${{ env.DAY }}"
+          body: |
+            This pull request was automatically generated to add the daily contribution for ${{ env.YEAR }}-${{ env.MONTH }}-${{ env.DAY }}.
+            
+            Changes include:
+            - Updated README.md with new daily topics
+            - Created a new file for today's update
+          branch: daily-contribution-${{ env.YEAR }}-${{ env.MONTH }}
+          base: main
