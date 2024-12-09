@@ -79,3 +79,42 @@ jobs:
               body: 'This is an automatically generated issue for daily activity.',
             });
             console.log(`Created issue #${issue.data.number}`);
+
+      # 2. Close all open issues
+      - name: Close all open issues
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GH_TOKEN2 }}
+          script: |
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+            });
+
+            if (issues.data.length === 0) {
+              console.log("No open issues found.");
+              return;
+            }
+
+            for (const issue of issues.data) {
+              console.log(`Processing issue #${issue.number}: ${issue.title}`);
+
+              // Add a comment before closing
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `This issue is being closed automatically as part of the daily workflow. Thank you for your contributions!`,
+              });
+
+              // Close the issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: "closed",
+              });
+
+              console.log(`Closed issue #${issue.number}.`);
+            }
