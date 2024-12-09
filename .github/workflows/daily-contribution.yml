@@ -31,9 +31,9 @@ jobs:
       # 4. Generate daily content and update README.md
       - name: Generate daily content
         run: |
-          echo "## Daily Contribution for ${env.year}-${env.month}-${env.day}" >> README.md
+          echo "## Daily Contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}" >> README.md
           echo "- Random topic generated" >> README.md
-          echo "Daily update log added for tracking progress." >> logs/${env.year}-${env.month}-${env.day}.log
+          echo "Daily update log added for tracking progress." >> logs/${{ env.year }}-${{ env.month }}-${{ env.day }}.log
 
       # 5. Pull latest changes
       - name: Pull latest changes
@@ -68,7 +68,7 @@ jobs:
           branch: daily-contribution-${{ env.year }}-${{ env.month }}
           base: ramincsy-patch-1
 
-    manage-issues:
+  manage-issues:
     runs-on: ubuntu-22.04
     steps:
       # 1. Create multiple issues
