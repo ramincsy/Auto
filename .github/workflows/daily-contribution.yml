@@ -36,8 +36,8 @@ jobs:
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
         with:
-          author_name: "Your GitHub Username"
-          author_email: "your-email@example.com"
+          author_name: "ramincsy"
+          author_email: "ramincsy2@gmail.com"
           message: "Automated daily contribution 🚀"
           add: "README.md"
 
