@@ -26,6 +26,12 @@ jobs:
           echo "month=$(date +'%m')" >> $GITHUB_ENV
           echo "year=$(date +'%Y')" >> $GITHUB_ENV
 
+      - name: Pull latest changes
+        run: |
+          git fetch origin
+          git checkout -b daily-contribution-${{ env.year }}-${{ env.month }} origin/daily-contribution-${{ env.year }}-${{ env.month }} || git checkout -b daily-contribution-${{ env.year }}-${{ env.month }}
+          git pull --rebase origin daily-contribution-${{ env.year }}-${{ env.month }} || true
+
       - name: Generate daily content
         env:
           DAY: ${{ env.day }}
@@ -60,15 +66,9 @@ with open('README.md', 'a') as f:
           message: "Daily contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
           add: "README.md updates/"
 
-      - name: Pull latest changes
-        run: |
-          git pull origin daily-contribution-${{ env.year }}-${{ env.month }} --rebase || true
-
       - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          branch: daily-contribution-${{ env.year }}-${{ env.month }}
-          github_token: ${{ secrets.GH_TOKEN }}
+        run: |
+          git push origin daily-contribution-${{ env.year }}-${{ env.month }} --force-with-lease
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
