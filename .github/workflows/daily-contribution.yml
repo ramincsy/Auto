@@ -32,19 +32,18 @@ jobs:
       - name: Generate daily content
         run: python generate_content.py
 
-      # 5. Stash changes before pulling latest updates
-      - name: Stash changes
-        run: git stash --include-untracked
+      # 5. Pull latest changes
+      - name: Pull latest changes without rebase
+        run: git pull origin master
 
-      # 6. Pull the latest changes to avoid conflicts
-      - name: Pull latest changes
-        run: git pull origin master --rebase
+      # 6. Resolve conflicts automatically (if any)
+      - name: Resolve conflicts automatically
+        run: |
+          git checkout --theirs .
+          git add .
+          git rebase --continue || echo "No rebase in progress"
 
-      # 7. Apply stashed changes
-      - name: Apply stashed changes
-        run: git stash pop || echo "No stashed changes to apply"
-
-      # 8. Commit changes
+      # 7. Commit changes
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
         with:
@@ -53,12 +52,18 @@ jobs:
           message: "Automated daily contribution 🚀"
           add: "README.md"
 
-      # 9. Push changes
+      # 8. Push changes
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GH_TOKEN }}
-          force: false  # Change to true if you want to force push
+          force: false
+
+      # 9. Delete unnecessary branches (optional)
+      - name: Delete unnecessary branches
+        run: |
+          git branch -D old-branch-name || echo "Branch does not exist locally"
+          git push origin --delete old-branch-name || echo "Branch does not exist remotely"
 
       # 10. Create Pull Request
       - name: Create Pull Request
