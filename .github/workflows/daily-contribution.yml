@@ -1,3 +1,4 @@
+
 name: Enhanced Daily Contributions
 
 on:
@@ -31,9 +32,7 @@ jobs:
       # 4. Generate daily content and update README.md
       - name: Generate daily content
         run: |
-          echo "## Daily Contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}" >> README.md
-          echo "- Random topic generated" >> README.md
-          echo "Daily update log added for tracking progress." >> logs/${{ env.year }}-${{ env.month }}-${{ env.day }}.log
+          python generate_content.py
 
       # 5. Pull latest changes
       - name: Pull latest changes
@@ -62,29 +61,25 @@ jobs:
           title: "Daily Contribution: ${{ env.year }}-${{ env.month }}-${{ env.day }}"
           body: |
             This Pull Request was automatically generated to add daily contributions.
-            - Added daily updates
-            - Closed stale issues
-            - Created new issues for tracking progress
           branch: daily-contribution-${{ env.year }}-${{ env.month }}
           base: ramincsy-patch-1
 
   manage-issues:
     runs-on: ubuntu-22.04
     steps:
-      # 1. Create multiple issues
-      - name: Create multiple issues
+      # 1. Create a new issue
+      - name: Create a new issue
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GH_TOKEN2 }}
           script: |
-            for (let i = 1; i <= 3; i++) {
-              await github.rest.issues.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: `Generated Issue ${i} for ${process.env.year}-${process.env.month}-${process.env.day}`,
-                body: `Automatically created issue #${i} for tracking contributions.`,
-              });
-            }
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: Daily Issue: ${{ env.year }}-${{ env.month }}-${{ env.day }},
+              body: 'This is an automatically generated issue for daily activity.',
+            });
+            console.log(Created issue #${issue.data.number});
 
       # 2. Close all open issues
       - name: Close all open issues
@@ -104,14 +99,14 @@ jobs:
             }
 
             for (const issue of issues.data) {
-              console.log(`Processing issue #${issue.number}: ${issue.title}`);
+              console.log(Processing issue #${issue.number}: ${issue.title});
 
               // Add a comment before closing
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
-                body: `This issue is being closed automatically as part of the daily workflow. Keep contributing!`,
+                body: This issue is being closed automatically as part of the daily workflow. Thank you for your contributions!,
               });
 
               // Close the issue
@@ -122,35 +117,5 @@ jobs:
                 state: "closed",
               });
 
-              console.log(`Closed issue #${issue.number}.`);
-            }
-
-  review-pull-requests:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Review open pull requests
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GH_TOKEN2 }}
-          script: |
-            const pullRequests = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: "open",
-            });
-
-            if (pullRequests.data.length === 0) {
-              console.log("No open pull requests found.");
-              return;
-            }
-
-            for (const pr of pullRequests.data) {
-              console.log(`Reviewing PR #${pr.number}: ${pr.title}`);
-              await github.rest.pulls.createReview({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: pr.number,
-                event: "COMMENT",
-                body: "Great work! Keep it up! 🚀",
-              });
+              console.log(Closed issue #${issue.number}.);
             }
