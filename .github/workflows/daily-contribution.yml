@@ -75,7 +75,7 @@ jobs:
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Daily Issue: ${{ env.year }}-${{ env.month }}-${{ env.day }}`,
+              title: `Daily Issue: ${process.env.year}-${process.env.month}-${process.env.day}`,
               body: 'This is an automatically generated issue for daily activity.',
             });
             console.log(`Created issue #${issue.data.number}`);
@@ -86,6 +86,10 @@ jobs:
         with:
           github-token: ${{ secrets.GH_TOKEN2 }}
           script: |
+            async function delay(ms) {
+              return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -117,4 +121,5 @@ jobs:
               });
 
               console.log(`Closed issue #${issue.number}.`);
+              await delay(2000); // Add a 2-second delay between requests
             }
