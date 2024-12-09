@@ -32,18 +32,11 @@ jobs:
       - name: Generate daily content
         run: python generate_content.py
 
-      # 5. Pull latest changes
+      # 5. Pull latest changes from `ramincsy-patch-1`
       - name: Pull latest changes without rebase
-        run: git pull origin master
+        run: git pull origin ramincsy-patch-1
 
-      # 6. Resolve conflicts automatically (if any)
-      - name: Resolve conflicts automatically
-        run: |
-          git checkout --theirs .
-          git add .
-          git rebase --continue || echo "No rebase in progress"
-
-      # 7. Commit changes
+      # 6. Commit changes
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
         with:
@@ -52,20 +45,14 @@ jobs:
           message: "Automated daily contribution 🚀"
           add: "README.md"
 
-      # 8. Push changes
+      # 7. Push changes to `ramincsy-patch-1`
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GH_TOKEN }}
-          force: false
+          branch: ramincsy-patch-1  # Push to `ramincsy-patch-1`
 
-      # 9. Delete unnecessary branches (optional)
-      - name: Delete unnecessary branches
-        run: |
-          git branch -D old-branch-name || echo "Branch does not exist locally"
-          git push origin --delete old-branch-name || echo "Branch does not exist remotely"
-
-      # 10. Create Pull Request
+      # 8. Create Pull Request
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
@@ -75,4 +62,4 @@ jobs:
           body: |
             This Pull Request was automatically generated to add daily contributions.
           branch: daily-contribution-${{ env.year }}-${{ env.month }}
-          base: main
+          base: ramincsy-patch-1  # Pull Request targets `ramincsy-patch-1`
