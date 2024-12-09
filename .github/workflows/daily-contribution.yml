@@ -2,12 +2,12 @@ name: Enhanced Daily Contributions
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Run daily at midnight
+    - cron: '0 0 * * *'  # Run daily
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
   make-contribution:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04  # Explicitly set version to avoid warnings
     steps:
       # 1. Checkout repository
       - name: Checkout repository
@@ -35,18 +35,16 @@ jobs:
 
       # 5. Pull latest changes
       - name: Pull latest changes
-        run: git pull origin ramincsy-patch-1
+        run: |
+          git pull origin ramincsy-patch-1 || echo "No updates to pull"
 
-      # 6. Commit daily changes
-      - name: Commit changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          author_name: "ramincsy"
-          author_email: "ramincsy2@gmail.com"
-          message: "Automated daily contribution 🚀"
-          add: "README.md updates/"
+      # 6. Stage and Commit changes
+      - name: Stage and Commit changes
+        run: |
+          git add .
+          git commit -m "Automated daily contribution 🚀" || echo "No changes to commit"
 
-      # 7. Push changes to branch
+      # 7. Push changes
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
@@ -66,9 +64,9 @@ jobs:
           base: ramincsy-patch-1
 
   manage-issues:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      # 1. Create an issue
+      # 1. Create a new issue
       - name: Create a new issue
         uses: actions/github-script@v6
         with:
@@ -81,24 +79,3 @@ jobs:
               body: 'This is an automatically generated issue for daily activity.',
             });
             console.log(`Created issue #${issue.data.number}`);
-
-      # 2. Close issues (optional)
-      - name: Close all open issues
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GH_TOKEN }}
-          script: |
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: "open",
-            });
-            for (const issue of issues.data) {
-              await github.rest.issues.update({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
-                state: "closed",
-              });
-              console.log(`Closed issue #${issue.number}`);
-            }
