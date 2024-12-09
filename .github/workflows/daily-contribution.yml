@@ -62,7 +62,9 @@ with open('README.md', 'a') as f:
 
       - name: Pull remote changes
         run: |
-          git pull origin daily-contribution-${{ env.year }}-${{ env.month }} --rebase
+          git config --global user.name "ramincsy"
+          git config --global user.email "ramincsy2@gmail.com"
+          git pull origin daily-contribution-${{ env.year }}-${{ env.month }} --rebase || true
 
       - name: Push changes
         uses: ad-m/github-push-action@master
