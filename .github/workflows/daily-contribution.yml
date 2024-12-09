@@ -60,6 +60,10 @@ with open('README.md', 'a') as f:
           message: "Daily contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
           add: "README.md updates/"
 
+      - name: Pull remote changes
+        run: |
+          git pull origin daily-contribution-${{ env.year }}-${{ env.month }} --rebase
+
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
