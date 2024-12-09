@@ -68,10 +68,10 @@ jobs:
           branch: daily-contribution-${{ env.year }}-${{ env.month }}
           base: ramincsy-patch-1
 
-  manage-issues:
+    manage-issues:
     runs-on: ubuntu-22.04
     steps:
-      # 1. Create a new issue
+      # 1. Create multiple issues
       - name: Create multiple issues
         uses: actions/github-script@v6
         with:
@@ -81,7 +81,7 @@ jobs:
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: `Generated Issue ${i} for ${env.year}-${env.month}-${env.day}`,
+                title: `Generated Issue ${i} for ${process.env.year}-${process.env.month}-${process.env.day}`,
                 body: `Automatically created issue #${i} for tracking contributions.`,
               });
             }
