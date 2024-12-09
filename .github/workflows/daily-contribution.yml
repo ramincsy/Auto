@@ -1,4 +1,3 @@
-
 name: Enhanced Daily Contributions
 
 on:
@@ -76,10 +75,10 @@ jobs:
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: Daily Issue: ${{ env.year }}-${{ env.month }}-${{ env.day }},
+              title: `Daily Issue: ${{ env.year }}-${{ env.month }}-${{ env.day }}`,
               body: 'This is an automatically generated issue for daily activity.',
             });
-            console.log(Created issue #${issue.data.number});
+            console.log(`Created issue #${issue.data.number}`);
 
       # 2. Close all open issues
       - name: Close all open issues
@@ -99,14 +98,14 @@ jobs:
             }
 
             for (const issue of issues.data) {
-              console.log(Processing issue #${issue.number}: ${issue.title});
+              console.log(`Processing issue #${issue.number}: ${issue.title}`);
 
               // Add a comment before closing
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
-                body: This issue is being closed automatically as part of the daily workflow. Thank you for your contributions!,
+                body: `This issue is being closed automatically as part of the daily workflow. Thank you for your contributions!`,
               });
 
               // Close the issue
@@ -117,5 +116,5 @@ jobs:
                 state: "closed",
               });
 
-              console.log(Closed issue #${issue.number}.);
+              console.log(`Closed issue #${issue.number}.`);
             }
