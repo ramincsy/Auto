@@ -48,14 +48,14 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
-          github_token: ${{ secrets.GH_TOKEN }}
+          github_token: ${{ secrets.GH_TOKEN2 }}
           branch: ramincsy-patch-1
 
       # 8. Create Pull Request
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.GH_TOKEN2 }}
           commit-message: "Automated PR for daily contributions 🚀"
           title: "Daily Contribution: ${{ env.year }}-${{ env.month }}-${{ env.day }}"
           body: |
@@ -70,7 +70,7 @@ jobs:
       - name: Create a new issue
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.GH_TOKEN2 }}
           script: |
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
