@@ -1,18 +1,90 @@
-name: Close All Issues
+name: Enhanced Daily Contributions and Close Issues
 
 on:
-  workflow_dispatch:  # Run manually
+  schedule:
+    - cron: '0 */12 * * *'  # Run every 12 hours
+  workflow_dispatch:  # Allow manual trigger
 
 jobs:
+  make-contribution:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for all branches and tags
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Get current date info
+        id: date
+        run: |
+          echo "day=$(date +'%d')" >> $GITHUB_ENV
+          echo "month=$(date +'%m')" >> $GITHUB_ENV
+          echo "year=$(date +'%Y')" >> $GITHUB_ENV
+
+      - name: Generate daily content
+        run: |
+          python -c "
+import random
+import os
+
+def generate_content():
+    topics = ['AI', 'Machine Learning', 'Data Science', 'Web Development', 'Cloud Computing']
+    return f'Daily study topic: {random.choice(topics)}'
+
+date_string = f'{os.getenv('year')}-{os.getenv('month')}-{os.getenv('day')}'
+with open('README.md', 'a') as f:
+    f.write(f'\n\n## Contribution for {date_string}\n')
+    for i in range(int(os.getenv('day'))):
+        f.write(f'- {generate_content()}\n')
+"
+
+      - name: Create directory structure and new file
+        run: |
+          mkdir -p "updates/${{ env.year }}/${{ env.month }}"
+          echo "Daily update for ${{ env.year }}-${{ env.month }}-${{ env.day }}" > "updates/${{ env.year }}/${{ env.month }}/${{ env.day }}.md"
+
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: "ramincsy"
+          author_email: "ramincsy2@gmail.com"
+          message: "Daily contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
+          add: "README.md updates/"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: daily-contribution-${{ env.year }}-${{ env.month }}
+          github_token: ${{ secrets.GH_TOKEN }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          commit-message: "Daily contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
+          title: "Daily Contribution: ${{ env.year }}-${{ env.month }}-${{ env.day }}"
+          body: |
+            This pull request was automatically generated to add the daily contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}.
+            
+            Changes include:
+            - Updated README.md with new daily topics
+            - Created a new file for today's update
+          branch: daily-contribution-${{ env.year }}-${{ env.month }}
+          base: main
+
   close-issues:
     runs-on: ubuntu-latest
     steps:
-      - name: Close all issues
+      - name: Close all open issues
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
-            // فراخوانی API و بررسی Issues باز
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -25,12 +97,12 @@ jobs:
             }
 
             for (const issue of issues.data) {
-              // بستن هر Issue
+              console.log(`Closing issue #${issue.number}: ${issue.title}`);
               await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
                 state: "closed",
               });
-              console.log(`Closed issue #${issue.number}: ${issue.title}`);
+              console.log(`Closed issue #${issue.number}.`);
             }
