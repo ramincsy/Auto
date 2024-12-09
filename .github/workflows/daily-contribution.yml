@@ -7,29 +7,26 @@ jobs:
   close-issues:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout repository
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      # Step 2: Close all open issues
       - name: Close all issues
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
-            const { data: issues } = await github.issues.listForRepo({
+            // فراخوانی API و بررسی Issues باز
+            const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: "open",
             });
 
-            if (issues.length === 0) {
+            if (issues.data.length === 0) {
               console.log("No open issues found.");
               return;
             }
 
-            for (const issue of issues) {
-              await github.issues.update({
+            for (const issue of issues.data) {
+              // بستن هر Issue
+              await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
