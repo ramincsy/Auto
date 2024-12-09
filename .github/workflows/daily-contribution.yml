@@ -28,7 +28,7 @@ jobs:
 
       - name: Generate daily content
         run: |
-          python -c "
+          python - <<EOF
 import random
 import os
 
@@ -36,12 +36,12 @@ def generate_content():
     topics = ['AI', 'Machine Learning', 'Data Science', 'Web Development', 'Cloud Computing']
     return f'Daily study topic: {random.choice(topics)}'
 
-date_string = f\"{os.getenv('year')}-{os.getenv('month')}-{os.getenv('day')}\"
+date_string = f"{os.getenv('year')}-{os.getenv('month')}-{os.getenv('day')}"
 with open('README.md', 'a') as f:
-    f.write(f\"\\n\\n## Contribution for {date_string}\\n\")
+    f.write(f"\\n\\n## Contribution for {date_string}\\n")
     for i in range(int(os.getenv('day'))):
-        f.write(f\"- {generate_content()}\\n\")
-"
+        f.write(f"- {generate_content()}\\n")
+EOF
 
       - name: Create directory structure and new file
         run: |
