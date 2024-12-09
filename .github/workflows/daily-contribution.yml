@@ -9,16 +9,19 @@ jobs:
   make-contribution:
     runs-on: ubuntu-latest
     steps:
+      # 1. Checkout repository
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Fetch all history for all branches and tags
+          fetch-depth: 0  # Ensure we fetch all history for accurate operations
 
+      # 2. Setup Python environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
+      # 3. Get current date
       - name: Get current date info
         id: date
         run: |
@@ -26,17 +29,15 @@ jobs:
           echo "month=$(date +'%m')" >> $GITHUB_ENV
           echo "year=$(date +'%Y')" >> $GITHUB_ENV
 
+      # 4. Pull changes from remote branch (to avoid non-fast-forward errors)
       - name: Pull latest changes
         run: |
           git fetch origin
-          git checkout -b daily-contribution-${{ env.year }}-${{ env.month }} origin/daily-contribution-${{ env.year }}-${{ env.month }} || git checkout -b daily-contribution-${{ env.year }}-${{ env.month }}
-          git pull --rebase origin daily-contribution-${{ env.year }}-${{ env.month }} || true
+          git checkout -b daily-contribution-${{ env.year }}-${{ env.month }} || git checkout daily-contribution-${{ env.year }}-${{ env.month }}
+          git pull origin daily-contribution-${{ env.year }}-${{ env.month }} --rebase || true
 
+      # 5. Generate daily content
       - name: Generate daily content
-        env:
-          DAY: ${{ env.day }}
-          MONTH: ${{ env.month }}
-          YEAR: ${{ env.year }}
         run: |
           python -c "
 import random
@@ -46,30 +47,33 @@ def generate_content():
     topics = ['AI', 'Machine Learning', 'Data Science', 'Web Development', 'Cloud Computing']
     return f'Daily study topic: {random.choice(topics)}'
 
-date_string = f'{os.getenv('YEAR')}-{os.getenv('MONTH')}-{os.getenv('DAY')}'
+date_string = f'{os.getenv('year')}-{os.getenv('month')}-{os.getenv('day')}'
 with open('README.md', 'a') as f:
     f.write(f'\n\n## Contribution for {date_string}\n')
-    for i in range(int(os.getenv('DAY'))):
+    for i in range(int(os.getenv('day'))):
         f.write(f'- {generate_content()}\n')
 "
 
+      # 6. Create directory and file for daily update
       - name: Create directory structure and new file
         run: |
           mkdir -p "updates/${{ env.year }}/${{ env.month }}"
           echo "Daily update for ${{ env.year }}-${{ env.month }}-${{ env.day }}" > "updates/${{ env.year }}/${{ env.month }}/${{ env.day }}.md"
 
+      # 7. Add and commit changes
       - name: Commit changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          author_name: "ramincsy"
-          author_email: "ramincsy2@gmail.com"
-          message: "Daily contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}"
-          add: "README.md updates/"
+        run: |
+          git add README.md "updates/${{ env.year }}/${{ env.month }}/${{ env.day }}.md"
+          git config --global user.name "ramincsy"
+          git config --global user.email "ramincsy2@gmail.com"
+          git commit -m "Daily contribution for ${{ env.year }}-${{ env.month }}-${{ env.day }}" || echo "No changes to commit"
 
+      # 8. Push changes
       - name: Push changes
         run: |
           git push origin daily-contribution-${{ env.year }}-${{ env.month }} --force-with-lease
 
+      # 9. Create Pull Request
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
@@ -84,15 +88,3 @@ with open('README.md', 'a') as f:
             - Created a new file for today's update
           branch: daily-contribution-${{ env.year }}-${{ env.month }}
           base: main
-
-      - name: Create Issue
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GH_TOKEN }}
-          script: |
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `Daily Contribution Report: ${{ env.year }}-${{ env.month }}-${{ env.day }}`,
-              body: 'A new daily contribution has been made. Please review the latest pull request.'
-            })
