@@ -7,53 +7,46 @@ on:
 
 jobs:
   make-contribution:
-    runs-on: ubuntu-22.04  # Explicitly set version to avoid warnings
+    runs-on: ubuntu-22.04
     steps:
-      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
-      # 2. Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      # 3. Set environment variables for the current date
+      - name: Configure Git user
+        run: |
+          git config --global user.email "you@example.com"
+          git config --global user.name "Your Name"
+
       - name: Get current date info
         run: |
           echo "day=$(date +'%d')" >> $GITHUB_ENV
           echo "month=$(date +'%m')" >> $GITHUB_ENV
           echo "year=$(date +'%Y')" >> $GITHUB_ENV
 
-      # 4. Generate daily content and update README.md
       - name: Generate daily content
-        run: |
-          python generate_content.py
+        run: python generate_content.py
 
-      # 5. Pull latest changes
       - name: Pull latest changes
-        run: |
-          git pull origin ramincsy-patch-1 || echo "No updates to pull"
+        run: git pull origin ramincsy-patch-1 || echo "No updates to pull"
 
-      # 6. Stage and Commit changes
       - name: Stage and Commit changes
-        run: 
+        run: |
           git add .
-          git config --global user.email "ramincsy2@gmail.com"
-          git config --global user.name "ramincsy"
-          git commit -m "Automated daily contribution 🚀" || echo "No changes to commit"
+          git diff-index --quiet HEAD || git commit -m "Automated daily contribution 🚀"
 
-      # 7. Push changes
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GH_TOKEN2 }}
           branch: ramincsy-patch-1
 
-      # 8. Create Pull Request
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
@@ -68,7 +61,6 @@ jobs:
   manage-issues:
     runs-on: ubuntu-22.04
     steps:
-      # 1. Create a new issue
       - name: Create a new issue
         uses: actions/github-script@v6
         with:
@@ -82,7 +74,6 @@ jobs:
             });
             console.log(`Created issue #${issue.data.number}`);
 
-      # 2. Close all open issues
       - name: Close all open issues
         uses: actions/github-script@v6
         with:
@@ -106,7 +97,6 @@ jobs:
             for (const issue of issues.data) {
               console.log(`Processing issue #${issue.number}: ${issue.title}`);
 
-              // Add a comment before closing
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -114,7 +104,6 @@ jobs:
                 body: `This issue is being closed automatically as part of the daily workflow. Thank you for your contributions!`,
               });
 
-              // Close the issue
               await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -123,5 +112,5 @@ jobs:
               });
 
               console.log(`Closed issue #${issue.number}.`);
-              await delay(2000); // Add a 2-second delay between requests
+              await delay(2000);
             }
