@@ -72,7 +72,7 @@ jobs:
                 body: `This Pull Request was automatically generated for branch ${branchName}.`,
               });
               console.log(`Created PR #${pr.data.number} for branch ${branchName}`);
-              await delay(30000); // 30-second delay between PRs
+              await delay(6000); // 6-second delay between PRs
             }
 
   manage-issues:
