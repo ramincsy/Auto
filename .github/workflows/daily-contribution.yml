@@ -39,27 +39,26 @@ jobs:
           git stash || echo "No local changes to stash"
           git pull origin ramincsy-patch-1 || echo "No updates to pull"
           git stash pop || echo "No stashed changes to apply"
-          sleep 5  # Wait for pull operation to complete
 
       - name: Stage and Commit changes
         run: |
           git add .
           if git diff-index --quiet HEAD; then
             echo "No changes to commit."
+            echo "SKIP_PULL_REQUEST=true" >> $GITHUB_ENV
           else
             git commit -m "Automated daily contribution 🚀"
+            echo "SKIP_PULL_REQUEST=false" >> $GITHUB_ENV
           fi
-          sleep 5  # Wait for commit operation to stabilize
 
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GH_TOKEN2 }}
           branch: ramincsy-patch-1
-      - name: Wait after Push
-        run: sleep 10
 
       - name: Create Pull Request
+        if: env.SKIP_PULL_REQUEST == 'false'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GH_TOKEN2 }}
@@ -69,8 +68,6 @@ jobs:
             This Pull Request was automatically generated to add daily contributions.
           branch: daily-contribution-${{ env.year }}-${{ env.month }}
           base: ramincsy-patch-1
-      - name: Wait after Pull Request
-        run: sleep 10
 
   manage-issues:
     runs-on: ubuntu-22.04
@@ -87,9 +84,8 @@ jobs:
               body: 'This is an automatically generated issue for daily activity.',
             });
             console.log(`Created issue #${issue.data.number}`);
-            await new Promise(resolve => setTimeout(resolve, 5000));  // Delay for rate limit
 
-      - name: Close all open issues with a delay
+      - name: Close all open issues
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GH_TOKEN2 }}
@@ -127,5 +123,5 @@ jobs:
               });
 
               console.log(`Closed issue #${issue.number}.`);
-              await delay(5000);  // Delay to avoid hitting rate limits
+              await delay(5000);
             }
