@@ -21,8 +21,8 @@ jobs:
 
       - name: Configure Git user
         run: |
-          git config --global user.email "you@example.com"
-          git config --global user.name "Your Name"
+          git config --global user.email "ramincsy2@gmail.com"
+          git config --global user.name "ramincsy"
 
       - name: Get current date info
         run: |
