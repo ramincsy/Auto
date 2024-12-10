@@ -40,34 +40,40 @@ jobs:
           git pull origin ramincsy-patch-1 --rebase || echo "No updates to pull"
           git stash pop || echo "No stashed changes to apply"
 
-      - name: Stage and Commit changes
+      - name: Create and Push Multiple Branches
         run: |
-          git add .
-          if git diff-index --quiet HEAD; then
-            echo "No changes to commit."
-            echo "SKIP_PULL_REQUEST=true" >> $GITHUB_ENV
-          else
-            git commit -m "Automated daily contribution 🚀"
-            echo "SKIP_PULL_REQUEST=false" >> $GITHUB_ENV
-          fi
+          for i in {1..4}; do
+            BRANCH_NAME="daily-contribution-${{ env.year }}-${{ env.month }}-PR$i"
+            git checkout -b $BRANCH_NAME || git checkout $BRANCH_NAME
+            git add .
+            git commit -m "Automated contribution for branch $BRANCH_NAME 🚀" || echo "No changes to commit for $BRANCH_NAME"
+            git push origin $BRANCH_NAME --force
+            echo "Created branch $BRANCH_NAME"
+            sleep 10
+          done
 
-      - name: Push changes
-        if: env.SKIP_PULL_REQUEST == 'false'
-        run: |
-          git push origin ramincsy-patch-1 || echo "Push failed. Trying again..."
-          sleep 5  # Wait to ensure push is complete
-
-      - name: Create Pull Request
-        if: env.SKIP_PULL_REQUEST == 'false'
-        uses: peter-evans/create-pull-request@v5
+      - name: Create Multiple Pull Requests
+        uses: actions/github-script@v6
         with:
-          token: ${{ secrets.GH_TOKEN2 }}
-          commit-message: "Automated PR for daily contributions 🚀"
-          title: "Daily Contribution: ${{ env.year }}-${{ env.month }}-${{ env.day }}"
-          body: |
-            This Pull Request was automatically generated to add daily contributions.
-          branch: daily-contribution-${{ env.year }}-${{ env.month }}
-          base: ramincsy-patch-1
+          github-token: ${{ secrets.GH_TOKEN2 }}
+          script: |
+            async function delay(ms) {
+              return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            for (let i = 1; i <= 4; i++) {
+              const branchName = `daily-contribution-${process.env.year}-${process.env.month}-PR${i}`;
+              const pr = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Automated Pull Request for ${branchName}`,
+                head: branchName,
+                base: "ramincsy-patch-1",
+                body: `This Pull Request was automatically generated for branch ${branchName}.`,
+              });
+              console.log(`Created PR #${pr.data.number} for branch ${branchName}`);
+              await delay(30000); // 30-second delay between PRs
+            }
 
   manage-issues:
     runs-on: ubuntu-22.04
