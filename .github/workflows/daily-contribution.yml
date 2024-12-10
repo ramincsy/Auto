@@ -58,6 +58,9 @@ jobs:
         with:
           github_token: ${{ secrets.GH_TOKEN2 }}
           branch: ramincsy-patch-1
+
+      - name: Wait after Push
+        if: env.SKIP_PULL_REQUEST == 'false'
         run: sleep 10
 
       - name: Create Pull Request
@@ -71,7 +74,6 @@ jobs:
             This Pull Request was automatically generated to add daily contributions.
           branch: daily-contribution-${{ env.year }}-${{ env.month }}
           base: ramincsy-patch-1
-        run: sleep 10
 
   manage-issues:
     runs-on: ubuntu-22.04
