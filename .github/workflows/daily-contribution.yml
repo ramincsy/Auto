@@ -84,7 +84,7 @@ jobs:
               body: 'This is an automatically generated issue for daily activity.',
             });
             console.log(`Created issue #${issue.data.number}`);
-            await new Promise(resolve => setTimeout(resolve, 5000));  # Ensure delay to prevent rate limit
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Ensure delay to prevent rate limit
 
       - name: Close all open issues
         uses: actions/github-script@v6
@@ -124,5 +124,5 @@ jobs:
               });
 
               console.log(`Closed issue #${issue.number}.`);
-              await delay(5000);  # Delay to avoid hitting rate limits
+              await delay(5000); // Delay to avoid hitting rate limits
             }
