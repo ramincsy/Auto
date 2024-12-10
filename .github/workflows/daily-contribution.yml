@@ -41,13 +41,20 @@ jobs:
 
       # 6. Pull latest changes to avoid conflicts
       - name: Pull latest changes
-        run: git pull origin ramincsy-patch-1 || echo "No updates to pull"
+        run: |
+          git pull origin ramincsy-patch-1 || echo "No updates to pull"
+          sleep 5  # Wait for pull operation to complete
 
       # 7. Stage and commit changes
       - name: Stage and Commit changes
         run: |
           git add .
-          git diff-index --quiet HEAD || git commit -m "Automated daily contribution 🚀"
+          if git diff-index --quiet HEAD; then
+            echo "No changes to commit."
+          else
+            git commit -m "Automated daily contribution 🚀"
+          fi
+          sleep 5  # Wait for commit operation to stabilize
 
       # 8. Push changes
       - name: Push changes
@@ -55,6 +62,8 @@ jobs:
         with:
           github_token: ${{ secrets.GH_TOKEN2 }}
           branch: ramincsy-patch-1
+      # Wait for push operation to complete
+      - run: sleep 10
 
       # 9. Create Pull Request
       - name: Create Pull Request
@@ -67,6 +76,8 @@ jobs:
             This Pull Request was automatically generated to add daily contributions.
           branch: daily-contribution-${{ env.year }}-${{ env.month }}
           base: ramincsy-patch-1
+        # Wait for Pull Request creation to complete
+        - run: sleep 10
 
   manage-issues:
     runs-on: ubuntu-22.04
@@ -84,6 +95,7 @@ jobs:
               body: 'This is an automatically generated issue for daily activity.',
             });
             console.log(`Created issue #${issue.data.number}`);
+            await new Promise(resolve => setTimeout(resolve, 5000));  // 5-second delay
 
       # 2. Close all open issues with a delay
       - name: Close all open issues
@@ -109,7 +121,6 @@ jobs:
             for (const issue of issues.data) {
               console.log(`Processing issue #${issue.number}: ${issue.title}`);
 
-              // Add a comment before closing
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -117,7 +128,6 @@ jobs:
                 body: `This issue is being closed automatically as part of the daily workflow. Thank you for your contributions!`,
               });
 
-              // Close the issue
               await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
