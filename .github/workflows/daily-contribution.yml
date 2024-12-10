@@ -59,6 +59,7 @@ jobs:
           base: ramincsy-patch-1
 
   manage-issues:
+    needs: make-contribution
     runs-on: ubuntu-22.04
     steps:
       - name: Create a new issue
@@ -66,10 +67,11 @@ jobs:
         with:
           github-token: ${{ secrets.GH_TOKEN2 }}
           script: |
+            const today = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Daily Issue: ${process.env.year}-${process.env.month}-${process.env.day}`,
+              title: `Daily Issue: ${today}`,
               body: 'This is an automatically generated issue for daily activity.',
             });
             console.log(`Created issue #${issue.data.number}`);
@@ -112,5 +114,5 @@ jobs:
               });
 
               console.log(`Closed issue #${issue.number}.`);
-              await delay(2000);
+              await delay(5000); # Wait 5 seconds to avoid rate limits
             }
