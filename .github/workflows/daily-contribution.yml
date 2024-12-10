@@ -32,13 +32,14 @@ jobs:
 
       - name: Generate daily content
         run: |
-          python generate_content.py
+          python generate_content.py || echo "No content generated."
 
       - name: Pull latest changes
         run: |
           git stash || echo "No local changes to stash"
           git pull origin ramincsy-patch-1 || echo "No updates to pull"
           git stash pop || echo "No stashed changes to apply"
+          sleep 5
 
       - name: Stage and Commit changes
         run: |
@@ -52,10 +53,12 @@ jobs:
           fi
 
       - name: Push changes
+        if: env.SKIP_PULL_REQUEST == 'false'
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GH_TOKEN2 }}
           branch: ramincsy-patch-1
+        run: sleep 10
 
       - name: Create Pull Request
         if: env.SKIP_PULL_REQUEST == 'false'
@@ -68,6 +71,7 @@ jobs:
             This Pull Request was automatically generated to add daily contributions.
           branch: daily-contribution-${{ env.year }}-${{ env.month }}
           base: ramincsy-patch-1
+        run: sleep 10
 
   manage-issues:
     runs-on: ubuntu-22.04
@@ -84,6 +88,7 @@ jobs:
               body: 'This is an automatically generated issue for daily activity.',
             });
             console.log(`Created issue #${issue.data.number}`);
+            await new Promise(resolve => setTimeout(resolve, 5000));
 
       - name: Close all open issues
         uses: actions/github-script@v6
@@ -107,7 +112,6 @@ jobs:
 
             for (const issue of issues.data) {
               console.log(`Processing issue #${issue.number}: ${issue.title}`);
-
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
