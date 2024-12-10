@@ -130,5 +130,5 @@ jobs:
                 body: `This is automatically generated issue number ${i} for the day.`,
               });
               console.log(`Created issue #${issue.data.number}`);
-              await delay(30000); // 30-second delay between issues
+              await delay(5000); // 5-second delay between issues
             }
