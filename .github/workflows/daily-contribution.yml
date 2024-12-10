@@ -9,44 +9,54 @@ jobs:
   make-contribution:
     runs-on: ubuntu-22.04
     steps:
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
+      # 2. Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
+      # 3. Configure Git user
       - name: Configure Git user
         run: |
           git config --global user.email "ramincsy2@gmail.com"
           git config --global user.name "ramincsy"
 
+      # 4. Set environment variables for the current date
       - name: Get current date info
         run: |
           echo "day=$(date +'%d')" >> $GITHUB_ENV
           echo "month=$(date +'%m')" >> $GITHUB_ENV
           echo "year=$(date +'%Y')" >> $GITHUB_ENV
 
+      # 5. Generate daily content and update files
       - name: Generate daily content
-        run: python generate_content.py
+        run: |
+          python generate_content.py
 
+      # 6. Pull latest changes to avoid conflicts
       - name: Pull latest changes
         run: git pull origin ramincsy-patch-1 || echo "No updates to pull"
 
+      # 7. Stage and commit changes
       - name: Stage and Commit changes
         run: |
           git add .
           git diff-index --quiet HEAD || git commit -m "Automated daily contribution 🚀"
 
+      # 8. Push changes
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GH_TOKEN2 }}
           branch: ramincsy-patch-1
 
+      # 9. Create Pull Request
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
@@ -59,23 +69,23 @@ jobs:
           base: ramincsy-patch-1
 
   manage-issues:
-    needs: make-contribution
     runs-on: ubuntu-22.04
     steps:
+      # 1. Create a new issue
       - name: Create a new issue
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GH_TOKEN2 }}
           script: |
-            const today = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Daily Issue: ${today}`,
+              title: `Daily Issue: ${new Date().toISOString().split('T')[0]}`,
               body: 'This is an automatically generated issue for daily activity.',
             });
             console.log(`Created issue #${issue.data.number}`);
 
+      # 2. Close all open issues with a delay
       - name: Close all open issues
         uses: actions/github-script@v6
         with:
@@ -99,6 +109,7 @@ jobs:
             for (const issue of issues.data) {
               console.log(`Processing issue #${issue.number}: ${issue.title}`);
 
+              // Add a comment before closing
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -106,6 +117,7 @@ jobs:
                 body: `This issue is being closed automatically as part of the daily workflow. Thank you for your contributions!`,
               });
 
+              // Close the issue
               await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -114,5 +126,5 @@ jobs:
               });
 
               console.log(`Closed issue #${issue.number}.`);
-              await delay(5000); # Wait 5 seconds to avoid rate limits
+              await delay(5000);  // 5-second delay to avoid hitting rate limits
             }
