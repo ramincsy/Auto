@@ -72,20 +72,6 @@ jobs:
   manage-issues:
     runs-on: ubuntu-22.04
     steps:
-      - name: Create a new issue
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GH_TOKEN2 }}
-          script: |
-            const issue = await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `Daily Issue: ${new Date().toISOString().split('T')[0]}`,
-              body: 'This is an automatically generated issue for daily activity.',
-            });
-            console.log(`Created issue #${issue.data.number}`);
-            await new Promise(resolve => setTimeout(resolve, 5000)); // Ensure delay to prevent rate limit
-
       - name: Close all open issues
         uses: actions/github-script@v6
         with:
@@ -125,4 +111,24 @@ jobs:
 
               console.log(`Closed issue #${issue.number}.`);
               await delay(5000); // Delay to avoid hitting rate limits
+            }
+
+      - name: Create 4 new issues with delay
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GH_TOKEN2 }}
+          script: |
+            async function delay(ms) {
+              return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            for (let i = 1; i <= 4; i++) {
+              const issue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Daily Issue ${i}: ${new Date().toISOString().split('T')[0]}`,
+                body: `This is automatically generated issue number ${i} for the day.`,
+              });
+              console.log(`Created issue #${issue.data.number}`);
+              await delay(30000); // 30-second delay between issues
             }
