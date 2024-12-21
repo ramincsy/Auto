@@ -128,7 +128,7 @@ jobs:
               return new Promise(resolve => setTimeout(resolve, ms));
             }
 
-            for (let i = 1; i <= 4; i++) {
+            for (let i = 1; i <= 6; i++) {
               const issue = await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
