@@ -74,3 +74,8 @@
 - Daily study topic: AI
 - Daily study topic: Machine Learning
 - Daily study topic: Data Science
+
+## Contributions for 2025-11-26
+- Daily study topic: Data Science
+- Daily study topic: AI
+- Daily study topic: AI
