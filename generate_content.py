@@ -1,7 +1,7 @@
 import os
 import random
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 # Load topic configuration

@@ -130,6 +130,29 @@ on:
 - **Code Quality**: Enforced via pre-commit
 - **Sustainability**: صفر اسپم، صفر force-push
 
+## 👥 دعوت دوستان برای کمک
+
+**می‌خواهید دوستانتان برای رسیدن به نشان‌های GitHub کمک کنند؟**
+
+👉 **راهنمای کامل:** [HOW_TO_INVITE_FRIENDS.md](./HOW_TO_INVITE_FRIENDS.md)
+
+### سه راه برای کمک:
+
+1. **Code Review** (🧠 Galaxy Brain)
+   - [راهنمای فارسی](./FRIENDS_GUIDE.md)
+   - [English Guide](./FRIENDS_GUIDE_EN.md)
+
+2. **Pull Request Merge** (🐋 Pull Shark)
+   - راهنما در فایل‌های بالا
+
+3. **Co-Authored Commits** (👥 Pair Extraordinaire)
+   - [Git Setup Guide](./GIT_SETUP_FOR_COAUTHOR.md)
+   - [نقش‌های مختلف](./FRIEND_ROLES.md)
+
+### پیام‌های آماده:
+- [دعوت‌نامه‌های آماده](./FRIEND_INVITATION_MESSAGES.md)
+- فقط کپی و پیست کنید! 📋
+
 ## 🤝 Contributing
 
 اگر می‌خواهید به بهبود این پروژه کمک کنید:
@@ -138,6 +161,9 @@ on:
 2. یک Feature Branch بسازید (`git checkout -b feature/xyz`)
 3. تغییرات خود را commit کنید
 4. یک Pull Request باز کنید
+
+یا:
+- 👉 [نقش‌های مختلف برای کمک](./FRIEND_ROLES.md)
 
 ## 📝 License
 
