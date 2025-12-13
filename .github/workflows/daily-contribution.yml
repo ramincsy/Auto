@@ -30,6 +30,8 @@ jobs:
       - name: Run pre-commit checks
         run: |
           pre-commit run --all-files --verbose || true
+
+      - name: Configure Git user
         run: |
           git config --global user.email "ramincsy2@gmail.com"
           git config --global user.name "ramincsy"
