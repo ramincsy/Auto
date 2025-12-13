@@ -79,3 +79,8 @@
 - Daily study topic: Cloud Computing
 - Daily study topic: AI
 - Daily study topic: Web Development
+
+## Contributions for 2025-12-13
+- Daily study topic: Data Science
+- Daily study topic: Data Science
+- Daily study topic: Cloud Computing
