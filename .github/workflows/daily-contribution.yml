@@ -50,8 +50,14 @@ jobs:
         run: |
           BRANCH_NAME="daily-contribution-${{ env.year }}-${{ env.month }}-${{ env.day }}"
           git fetch origin
-          git checkout -b "$BRANCH_NAME" 2>/dev/null || git checkout "$BRANCH_NAME"
-          git pull origin "$BRANCH_NAME" --no-edit 2>/dev/null || true
+          
+          # Try to checkout existing branch, otherwise create new one
+          if git rev-parse --verify origin/"$BRANCH_NAME" > /dev/null 2>&1; then
+            git checkout --track origin/"$BRANCH_NAME"
+            git pull origin "$BRANCH_NAME" --rebase 2>/dev/null || git rebase --abort 2>/dev/null || true
+          else
+            git checkout -b "$BRANCH_NAME"
+          fi
 
       - name: Commit changes if any
         run: |
@@ -59,8 +65,8 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Daily update: ${{ env.year }}-${{ env.month }}-${{ env.day }}" || true
-            git push origin HEAD
+            git commit -m "Daily update: ${{ env.year }}-${{ env.month }}-${{ env.day }}" || echo "Nothing new to commit"
+            git push origin HEAD --force-with-lease || git push origin HEAD
           fi
 
       - name: Open PR (if new commit)
