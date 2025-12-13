@@ -59,12 +59,12 @@ To earn the **Pull Shark** badge, PRs need to be merged.
 2. **Click Merge button:**
    ```
    Choose merge strategy:
-   
+
    [▼] Merge pull request
    [→] Create a merge commit
    [→] Squash and merge
    [→] Rebase and merge
-   
+
    Select any (first one is usually fine)
    ```
 
@@ -106,10 +106,10 @@ To earn **Pair Extraordinaire** badge, write a commit with two authors.
    ```bash
    git add .
    git commit -m "feat: improve documentation together
-   
+
    Co-authored-by: Friend Name <friend@example.com>"
    ```
-   
+
    **Explanation:**
    - Line 1: Description of change
    - Line 3: Your friend's name
