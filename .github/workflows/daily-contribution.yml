@@ -80,7 +80,7 @@ jobs:
 
 ## 📝 Changes
 - Daily contribution recorded
-- Generated update file: \`updates/${process.env.year}/${process.env.month}/${process.env.day}.md\`
+- Generated update file: updates/${process.env.year}/${process.env.month}/${process.env.day}.md
 - Updated: README.md
 
 ## 🎯 Purpose
