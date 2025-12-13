@@ -51,10 +51,10 @@ jobs:
           BRANCH_NAME="daily-contribution-${{ env.year }}-${{ env.month }}-${{ env.day }}"
           git fetch origin
           
-          # Try to checkout existing branch, otherwise create new one
+          # Always reset to origin if branch exists
           if git rev-parse --verify origin/"$BRANCH_NAME" > /dev/null 2>&1; then
-            git checkout --track origin/"$BRANCH_NAME"
-            git pull origin "$BRANCH_NAME" --rebase 2>/dev/null || git rebase --abort 2>/dev/null || true
+            git checkout "$BRANCH_NAME" || git checkout -b "$BRANCH_NAME" --track origin/"$BRANCH_NAME"
+            git reset --hard origin/"$BRANCH_NAME"
           else
             git checkout -b "$BRANCH_NAME"
           fi
@@ -66,7 +66,7 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Daily update: ${{ env.year }}-${{ env.month }}-${{ env.day }}" || echo "Nothing new to commit"
-            git push origin HEAD --force-with-lease || git push origin HEAD
+            git push origin HEAD --force-with-lease || git push origin HEAD --force
           fi
 
       - name: Open PR (if new commit)
