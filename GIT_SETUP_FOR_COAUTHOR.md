@@ -79,7 +79,7 @@ Co-authored-by: Friend Name <friend@email.com>"
 3. **این متن را بنویسید:**
    ```
    feat: improve documentation
-   
+
    Co-authored-by: Friend Name <friend@email.com>
    ```
 4. **Enter را بزنید**

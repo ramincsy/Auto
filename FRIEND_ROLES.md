@@ -96,7 +96,7 @@
 ```
 سلام [نام]!
 
-می‌خوای با هم یک commit بنویسیم؟ این جالب هست! 
+می‌خوای با هم یک commit بنویسیم؟ این جالب هست!
 
 مراحل:
 1. Repository رو clone کن:
@@ -110,7 +110,7 @@
 
 4. Commit کن:
    git commit -m "feat: improve something
-   
+
    Co-authored-by: [Your Name] <your@email.com>"
 
 5. Push کن:

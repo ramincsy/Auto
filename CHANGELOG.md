@@ -11,7 +11,7 @@
 - **CLI Tool**: `scripts/log_daily.py` برای ثبت یادداشت‌ها و موضوعات محلی
 - **Pre-commit Hooks**: اجرای خودکار `black` و `ruff` برای کیفیت کد
 - **Code Quality Workflow**: CI/CD برای بررسی کیفیت در PRها
-- **Comprehensive Documentation**: 
+- **Comprehensive Documentation**:
   - README.md با راهنمای کامل
   - ACHIEVEMENTS.md برای راهنمای دستاوردهای GitHub
   - QUICKSTART.md برای شروع سریع
