@@ -214,3 +214,8 @@ This project is open source and available under the MIT License.
 - 📚 Studied: Web Development (Frontend/Backend)
 - 📚 Studied: Web Development (Frontend/Backend)
 - 📚 Studied: Web Development (Frontend/Backend)
+
+## 📅 2026-01-10
+- 📚 Studied: Cloud Computing & DevOps
+- 📚 Studied: Cloud Computing & DevOps
+- 📚 Studied: Cloud Computing & DevOps
