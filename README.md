@@ -214,3 +214,8 @@ This project is open source and available under the MIT License.
 - 📚 Studied: Web Development (Frontend/Backend)
 - 📚 Studied: Web Development (Frontend/Backend)
 - 📚 Studied: Web Development (Frontend/Backend)
+
+## 📅 2026-01-17
+- 📚 Studied: Data Science & Analytics
+- 📚 Studied: Data Science & Analytics
+- 📚 Studied: Data Science & Analytics
