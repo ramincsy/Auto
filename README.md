@@ -25,6 +25,7 @@
 - **Safe Workflow**: بدون force-push، stash، یا اسپم
 - **Persian & English**: دوزبانه خروجی‌ها
 - **Structured Updates**: هر روز یک فایل `updates/YYYY/MM/DD.md`
+- **PR Management**: اسکریپت برای بستن تمام PR ها ([راهنما](./CLOSE_PRS_GUIDE.md))
 
 ## 🛠️ Setup
 
@@ -129,6 +130,27 @@ on:
 - **PRs/Month**: ~30 (تعامل واقعی)
 - **Code Quality**: Enforced via pre-commit
 - **Sustainability**: صفر اسپم، صفر force-push
+
+## 🔧 مدیریت Pull Request ها
+
+### بستن تمام PR های باز
+
+اگر نیاز دارید تمام PR های باز را ببندید:
+
+```bash
+# Install dependencies (if not already)
+pip install -r requirements.txt
+
+# Set your GitHub token
+export GITHUB_TOKEN='your_token_here'
+
+# Run the script
+python scripts/close_all_prs.py
+```
+
+📖 **راهنمای کامل**: [CLOSE_PRS_GUIDE.md](./CLOSE_PRS_GUIDE.md)
+
+⚠️  **نکته**: این عملیات از شما تأیید می‌خواهد قبل از بستن PR ها.
 
 ## 👥 دعوت دوستان برای کمک
 
