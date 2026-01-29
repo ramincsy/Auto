@@ -34,7 +34,7 @@ def get_open_prs(owner, repo, token):
     """Fetch all open pull requests."""
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls"
     headers = {
-        "Authorization": f"token {token}",
+        "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github.v3+json"
     }
     params = {
@@ -47,11 +47,19 @@ def get_open_prs(owner, repo, token):
     
     while True:
         params["page"] = page
-        response = requests.get(url, headers=headers, params=params)
+        
+        try:
+            response = requests.get(url, headers=headers, params=params, timeout=30)
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Network error fetching PRs: {e}")
+            sys.exit(1)
         
         if response.status_code != 200:
             print(f"❌ Error fetching PRs: {response.status_code}")
-            print(response.json())
+            try:
+                print(response.json())
+            except ValueError:
+                print(response.text)
             sys.exit(1)
         
         prs = response.json()
@@ -72,15 +80,18 @@ def close_pr(owner, repo, pr_number, token):
     """Close a specific pull request."""
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}"
     headers = {
-        "Authorization": f"token {token}",
+        "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github.v3+json"
     }
     data = {
         "state": "closed"
     }
     
-    response = requests.patch(url, headers=headers, json=data)
-    return response.status_code == 200
+    try:
+        response = requests.patch(url, headers=headers, json=data, timeout=30)
+        return response.status_code == 200
+    except requests.exceptions.RequestException:
+        return False
 
 
 def main():
