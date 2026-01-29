@@ -133,9 +133,9 @@ on:
 
 ## 🔧 مدیریت Pull Request ها
 
-### بستن تمام PR های باز
+### ✅ Merge کردن PR ها (پیشنهادی برای دستاوردهای GitHub)
 
-اگر نیاز دارید تمام PR های باز را ببندید:
+برای بررسی و merge کردن PR های روزانه به منظور دستیابی به دستاوردهای GitHub:
 
 ```bash
 # Install dependencies (if not already)
@@ -144,13 +144,34 @@ pip install -r requirements.txt
 # Set your GitHub token
 export GITHUB_TOKEN='your_token_here'
 
-# Run the script
+# Review PRs (without merging)
+python scripts/review_and_merge_prs.py
+
+# Auto-merge ready PRs
+python scripts/review_and_merge_prs.py --auto-merge
+```
+
+📖 **راهنماهای کامل**: 
+- [MERGE_PRS_QUICKSTART.md](./MERGE_PRS_QUICKSTART.md) - راهنمای سریع (English)
+- [MERGE_PRS_GUIDE.md](./MERGE_PRS_GUIDE.md) - راهنمای کامل (فارسی)
+
+🎯 **دستاوردها**: با merge کردن PR ها، دستاوردهای Pull Shark 🦈، Quickdraw ⚡ و YOLO 🎉 را بدست می‌آورید!
+
+### ❌ بستن تمام PR های باز
+
+اگر نیاز دارید تمام PR های باز را ببندید (بدون merge):
+
+```bash
+# Set your GitHub token
+export GITHUB_TOKEN='your_token_here'
+
+# Close all PRs
 python scripts/close_all_prs.py
 ```
 
 📖 **راهنمای کامل**: [CLOSE_PRS_GUIDE.md](./CLOSE_PRS_GUIDE.md)
 
-⚠️  **نکته**: این عملیات از شما تأیید می‌خواهد قبل از بستن PR ها.
+⚠️  **نکته**: برای دستیابی به دستاوردهای GitHub، بهتر است PR ها را merge کنید، نه close!
 
 ## 👥 دعوت دوستان برای کمک
 
