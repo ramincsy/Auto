@@ -9,7 +9,7 @@ Usage:
     python scripts/review_and_merge_prs.py [--auto-merge]
 
 Environment Variables:
-    GITHUB_TOKEN or GH_TOKEN2: GitHub personal access token with 'repo' scope
+    GITHUB_TOKEN or GH_TOKEN: GitHub personal access token with 'repo' scope
 
 Features:
     - Lists all daily contribution PRs
@@ -21,18 +21,16 @@ Features:
 
 import os
 import sys
-import json
 import requests
-from datetime import datetime
 from typing import List, Dict, Optional
 
 
 def get_github_token() -> str:
     """Get GitHub token from environment variables."""
-    token = os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN2')
+    token = os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN')
     if not token:
         print("❌ Error: No GitHub token found.")
-        print("Please set GITHUB_TOKEN or GH_TOKEN2 environment variable.")
+        print("Please set GITHUB_TOKEN or GH_TOKEN environment variable.")
         print("\nExample:")
         print("  export GITHUB_TOKEN='your_token_here'")
         print("  python scripts/review_and_merge_prs.py")
@@ -122,8 +120,8 @@ def check_pr_mergeable(owner: str, repo: str, pr_number: int, token: str) -> Opt
     return None
 
 
-def merge_pr(owner: str, repo: str, pr_number: int, token: str, merge_method: str = "merge") -> bool:
-    """Merge a pull request."""
+def merge_pr(owner: str, repo: str, pr_number: int, token: str, merge_method: str = "merge") -> tuple[bool, str]:
+    """Merge a pull request. Returns (success, message)."""
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/merge"
     headers = {
         "Authorization": f"Bearer {token}",
@@ -135,9 +133,13 @@ def merge_pr(owner: str, repo: str, pr_number: int, token: str, merge_method: st
     
     try:
         response = requests.put(url, headers=headers, json=data, timeout=30)
-        return response.status_code == 200
-    except requests.exceptions.RequestException:
-        return False
+        if response.status_code == 200:
+            return True, "Success"
+        else:
+            error_msg = response.json().get('message', 'Unknown error') if response.text else 'Unknown error'
+            return False, f"Error {response.status_code}: {error_msg}"
+    except requests.exceptions.RequestException as e:
+        return False, f"Network error: {str(e)}"
 
 
 def analyze_pr(pr: Dict, owner: str, repo: str, token: str) -> Dict:
@@ -170,6 +172,7 @@ def analyze_pr(pr: Dict, owner: str, repo: str, token: str) -> Dict:
         elif mergeable is False:
             analysis['recommendation'] = 'has_conflicts'
         else:
+            # mergeable is None - GitHub is still computing merge status
             analysis['recommendation'] = 'checking'
     else:
         analysis['recommendation'] = 'review_manually'
@@ -269,9 +272,9 @@ def main():
     # Parse arguments
     auto_merge = '--auto-merge' in sys.argv
     
-    # Repository information
-    owner = "ramincsy"
-    repo = "Auto"
+    # Repository information - can be overridden with env vars
+    owner = os.environ.get('GITHUB_REPOSITORY_OWNER', 'ramincsy')
+    repo = os.environ.get('GITHUB_REPOSITORY_NAME', 'Auto')
     
     print("🔍 Fetching GitHub token...")
     token = get_github_token()
@@ -320,11 +323,12 @@ def main():
             pr_number = pr['number']
             print(f"  Merging PR #{pr_number}...", end=" ")
             
-            if merge_pr(owner, repo, pr_number, token):
+            success, message = merge_pr(owner, repo, pr_number, token)
+            if success:
                 print("✅")
                 merged_count += 1
             else:
-                print("❌")
+                print(f"❌ ({message})")
                 failed_count += 1
         
         print(f"\n📊 Merge Summary:")

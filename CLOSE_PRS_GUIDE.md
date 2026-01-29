@@ -15,7 +15,7 @@
 
 1. به [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens) بروید
 2. روی **Generate new token (classic)** کلیک کنید
-3. یک نام معنادار انتخاب کنید (مثلاً: "Close PRs Script")
+3. یک نام معنادار انتخاب کنید (مثلاً: "Merge PRs Script")
 4. دسترسی **repo** را انتخاب کنید
 5. روی **Generate token** کلیک کنید
 6. توکن را کپی کنید (فقط یک بار نمایش داده می‌شود!)
@@ -110,7 +110,7 @@ Are you sure you want to continue? (yes/no): yes
 ## 🐛 عیب‌یابی
 
 ### خطا: "No GitHub token found"
-- مطمئن شوید `GITHUB_TOKEN` یا `GH_TOKEN2` تنظیم شده است
+- مطمئن شوید `GITHUB_TOKEN` یا `GH_TOKEN` تنظیم شده است
 - توکن را چک کنید که معتبر باشد
 
 ### خطا: "Error fetching PRs: 401"

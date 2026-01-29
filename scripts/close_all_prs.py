@@ -9,7 +9,7 @@ Usage:
     python scripts/close_all_prs.py
 
 Environment Variables:
-    GITHUB_TOKEN or GH_TOKEN2: GitHub personal access token with 'repo' scope
+    GITHUB_TOKEN or GH_TOKEN: GitHub personal access token with 'repo' scope
 """
 
 import os
@@ -19,10 +19,10 @@ import requests
 
 def get_github_token():
     """Get GitHub token from environment variables."""
-    token = os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN2')
+    token = os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN')
     if not token:
         print("❌ Error: No GitHub token found.")
-        print("Please set GITHUB_TOKEN or GH_TOKEN2 environment variable.")
+        print("Please set GITHUB_TOKEN or GH_TOKEN environment variable.")
         print("\nExample:")
         print("  export GITHUB_TOKEN='your_token_here'")
         print("  python scripts/close_all_prs.py")
