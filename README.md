@@ -151,7 +151,7 @@ python scripts/review_and_merge_prs.py
 python scripts/review_and_merge_prs.py --auto-merge
 ```
 
-📖 **راهنماهای کامل**: 
+📖 **راهنماهای کامل**:
 - [MERGE_PRS_QUICKSTART.md](./MERGE_PRS_QUICKSTART.md) - راهنمای سریع (English)
 - [MERGE_PRS_GUIDE.md](./MERGE_PRS_GUIDE.md) - راهنمای کامل (فارسی)
 
@@ -262,3 +262,8 @@ This project is open source and available under the MIT License.
 - 📚 Studied: Security & Best Practices
 - 📚 Studied: Security & Best Practices
 - 📚 Studied: Security & Best Practices
+
+## 📅 2026-02-03
+- 📚 Studied: System Design
+- 📚 Studied: System Design
+- 📚 Studied: System Design
