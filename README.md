@@ -267,3 +267,8 @@ This project is open source and available under the MIT License.
 - 📚 Studied: System Design
 - 📚 Studied: System Design
 - 📚 Studied: System Design
+
+## 📅 2026-03-25
+- 📚 Studied: Security & Best Practices
+- 📚 Studied: Security & Best Practices
+- 📚 Studied: Security & Best Practices
