@@ -9,7 +9,8 @@ Usage:
     python scripts/review_and_merge_prs.py [--auto-merge]
 
 Environment Variables:
-    GITHUB_TOKEN or GH_TOKEN: GitHub personal access token with 'repo' scope
+    GH_TOKEN3, GITHUB_TOKEN, or GH_TOKEN: GitHub personal access token with
+    'repo' scope
 
 Features:
     - Lists all daily contribution PRs
@@ -27,12 +28,12 @@ from typing import List, Dict, Optional
 
 def get_github_token() -> str:
     """Get GitHub token from environment variables."""
-    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    token = os.environ.get("GH_TOKEN3") or os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     if not token:
         print("❌ Error: No GitHub token found.")
-        print("Please set GITHUB_TOKEN or GH_TOKEN environment variable.")
+        print("Please set GH_TOKEN3, GITHUB_TOKEN, or GH_TOKEN environment variable.")
         print("\nExample:")
-        print("  export GITHUB_TOKEN='your_token_here'")
+        print("  export GH_TOKEN3='your_token_here'")
         print("  python scripts/review_and_merge_prs.py")
         sys.exit(1)
     return token
@@ -78,6 +79,17 @@ def get_open_prs(owner: str, repo: str, token: str) -> List[Dict]:
             break
 
     return all_prs
+
+
+def get_repo_info() -> tuple[str, str]:
+    """Return repository owner/name from environment or defaults."""
+    full_name = os.environ.get("GITHUB_REPOSITORY")
+    if full_name and "/" in full_name:
+        return tuple(full_name.split("/", 1))
+
+    owner = os.environ.get("GITHUB_REPOSITORY_OWNER", "ramincsy")
+    repo = os.environ.get("GITHUB_REPOSITORY_NAME", "Auto")
+    return owner, repo
 
 
 def get_pr_files(owner: str, repo: str, pr_number: int, token: str) -> List[Dict]:
@@ -283,8 +295,7 @@ def main():
     auto_merge = "--auto-merge" in sys.argv
 
     # Repository information - can be overridden with env vars
-    owner = os.environ.get("GITHUB_REPOSITORY_OWNER", "ramincsy")
-    repo = os.environ.get("GITHUB_REPOSITORY_NAME", "Auto")
+    owner, repo = get_repo_info()
 
     print("🔍 Fetching GitHub token...")
     token = get_github_token()
@@ -300,7 +311,7 @@ def main():
 
     # Analyze each PR
     analyses = []
-    for pr in open_prs:
+    for pr in sorted(open_prs, key=lambda item: item.get("created_at", "")):
         print(f"  Analyzing PR #{pr['number']}...", end=" ")
         analysis = analyze_pr(pr, owner, repo, token)
         analyses.append(analysis)

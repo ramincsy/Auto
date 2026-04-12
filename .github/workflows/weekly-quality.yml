@@ -1,0 +1,81 @@
+name: Weekly Quality Activity
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+jobs:
+  weekly-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN3 || secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Configure Git user
+        run: |
+          git config user.email "ramincsy2@gmail.com"
+          git config user.name "ramincsy"
+
+      - name: Generate weekly quality plan
+        run: python scripts/generate_weekly_focus.py
+
+      - name: Prepare branch and commit
+        id: commit_changes
+        run: |
+          ISO_YEAR=$(date +'%G')
+          ISO_WEEK=$(date +'%V')
+          BRANCH_NAME="weekly-quality-${ISO_YEAR}-w${ISO_WEEK}-${GITHUB_RUN_ID}"
+          echo "branch_name=${BRANCH_NAME}" >> "$GITHUB_OUTPUT"
+
+          if [ -z "$(git status --porcelain updates/weekly)" ]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git switch -c "$BRANCH_NAME"
+          git add updates/weekly
+          git commit -m "docs: add weekly quality plan ${ISO_YEAR}-W${ISO_WEEK}"
+          git push origin "$BRANCH_NAME"
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create weekly quality PR
+        if: steps.commit_changes.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_TOKEN3 || secrets.GITHUB_TOKEN }}
+          script: |
+            const branchName = '${{ steps.commit_changes.outputs.branch_name }}';
+            const title = 'docs: weekly quality activity plan';
+            const body =
+              '## Summary\n' +
+              '\n' +
+              '- Add the weekly quality plan file\n' +
+              '- Create one higher-signal activity anchor for this week\n' +
+              '- Support Starstruck, Pull Shark, Pair Extraordinaire, and Galaxy Brain planning\n' +
+              '\n' +
+              '## Why\n' +
+              '\n' +
+              'This PR complements the daily automation with one review-friendly weekly update.\n' +
+              '\n' +
+              '## Notes\n' +
+              '\n' +
+              '- Daily automation remains unchanged\n' +
+              '- This workflow adds a calmer, more meaningful layer of activity\n';
+
+            await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              head: branchName,
+              base: 'main',
+              body,
+            });

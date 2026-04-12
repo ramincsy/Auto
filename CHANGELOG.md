@@ -1,83 +1,43 @@
 # Changelog
 
-تمام تغییرات قابل‌توجه در این پروژه مستند است.
+All notable changes to this project are documented here.
+
+## [1.3.0] - Unreleased
+
+### Changed
+- Cleaned the repository root and moved non-core markdown files into `docs/`.
+- Split documentation into active guides and archived reports.
+- Removed the high-volume `complete-contribution` workflow from the active repository layout.
+- Simplified the scheduled daily workflow so it no longer edits `README.md`.
+- Kept bulk helper scripts as manual tools instead of scheduled workers.
+
+### Added
+- `docs/README.md` as the documentation index.
+- `scripts/README.md` as the script inventory and priority guide.
+- `.github/workflows/README.md` as the workflow priority and maintenance guide.
+- `tests/` directory for local validation scripts.
+
+### Removed
+- Unused high-volume worker files from active workflow usage.
+- Temporary local contribution test files created during validation.
+
+## [1.2.0] - Unreleased
+
+### Added
+- Hybrid achievements strategy document in `docs/guides/GITHUB_ACHIEVEMENTS_HYBRID_PLAN_FA.md`
+- Repository metadata files: `LICENSE`, `CODEOWNERS`, PR template, and Issue templates
+- Weekly quality planning script: `scripts/generate_weekly_focus.py`
+- Weekly quality workflow: `.github/workflows/weekly-quality.yml`
+
+### Changed
+- README now explains the hybrid model for GitHub Achievements
+- Repository guidance now distinguishes active, limited, and historical badges
 
 ## [1.0.0] - 2025-12-13
 
-### ✨ Added
-- **Automated Daily Contributions**: هر روز یک commit و PR اتومات
-- **Content Generation**: تولید محتوای روزانه با تنوع موضوعات
-- **Daily Update Files**: فایل‌های `updates/YYYY/MM/DD.md` برای ثبت یادداشت‌های روزانه
-- **CLI Tool**: `scripts/log_daily.py` برای ثبت یادداشت‌ها و موضوعات محلی
-- **Pre-commit Hooks**: اجرای خودکار `black` و `ruff` برای کیفیت کد
-- **Code Quality Workflow**: CI/CD برای بررسی کیفیت در PRها
-- **Comprehensive Documentation**:
-  - README.md با راهنمای کامل
-  - ACHIEVEMENTS.md برای راهنمای دستاوردهای GitHub
-  - QUICKSTART.md برای شروع سریع
-  - CONTRIBUTING.md برای رویه‌های مشارکت
-  - SECURITY.md برای سیاست‌های امنیتی
-- **Setup Scripts**: `setup.sh` (Linux/macOS) و `setup.bat` (Windows)
-- **Configuration**: `config/topics.json` برای پیکربندی موضوعات
-- **Fine-grained Token Support**: استفاده از GitHub Fine-Grained PAT برای امنیت بالا
-
-### 🔄 Changed
-- **Workflow Simplification**: حذف ساخت چندین PR و Issue هر روز
-- **Target Branch**: تغییر مقصد PR از `ramincsy-patch-1` به `main`
-- **PR Quality**: بهبود متن PR با توضیحات و لینک‌های معنادار
-- **Commit Safety**: حذف force-push و rebase خطرناک
-
-### 🐛 Fixed
-- **README Conflicts**: رفع نشانگرهای merge conflict
-- **Encoding Issues**: حل مسائل UTF-8 در اسکریپت‌های محلی
-- **Idempotency**: تضمین اینکه هر روز فقط یک بار محتوا اضافه می‌شود
-
-### 📦 Dependencies
-- `black`: فرمت‌کننده کد Python
-- `ruff`: linter و code checker
-- `pre-commit`: git hooks management
-
-### 📚 Documentation
-- **Comprehensive README**: توضیح کامل پروژه و نحوه استفاده
-- **Achievement Guide**: نقشه راه دستاوردهای GitHub
-- **Quick Start**: راهنمای ۵ دقیقه‌ای برای شروع
-
----
-
-## Future Plans (v1.1.0+)
-
-### 🚀 Planned Features
-- [ ] Weekly summary reports
-- [ ] GitHub Actions integration for auto-merge
-- [ ] Multi-language support (English/Persian)
-- [ ] Dashboard for tracking progress
-- [ ] Telegram/Slack notifications
-- [ ] Performance metrics tracking
-
-### 🔧 Under Consideration
-- [ ] Interactive CLI for logging
-- [ ] Time-zone support for workflow scheduling
-- [ ] Contribution badges
-- [ ] Stats visualization
-
----
-
-## Contribution Timeline
-
-| Version | Date | Status |
-|---------|------|--------|
-| v1.0.0 | 2025-12-13 | Released ✅ |
-| v1.1.0 | TBA | Planned |
-
----
-
-## Notes
-
-- این پروژه برای دستیابی به GitHub Achievements طراحی شد
-- تمام اقدامات ایمن و مطابق با سیاست‌های GitHub هستند
-- بدون spam یا automation abuse
-
----
-
-**آخرین به‌روزرسانی:** 2025-12-13
-**نگهدارنده:** ramincsy
+### Added
+- Automated daily contributions
+- Daily update files under `updates/YYYY/MM/`
+- Core contribution scripts and setup files
+- Pre-commit based formatting and linting
+- Initial documentation set
