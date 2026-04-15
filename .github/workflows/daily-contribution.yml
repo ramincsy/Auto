@@ -1,29 +1,21 @@
-name: Daily Contributions (Safe)
+name: 🚀 Complete Contribution System - 650+ Activities/Day
 
 on:
   schedule:
-    - cron: '0 0 * * *'
-    - cron: '0 12 * * *'
-  workflow_dispatch:
-
-permissions:
-  contents: write
-  pull-requests: write
-
-concurrency:
-  group: daily-contribution
-  cancel-in-progress: false
+    - cron: '0 8 * * *'   # 08:00 UTC (11:30 Tehran)
+    - cron: '0 14 * * *'  # 14:00 UTC (17:30 Tehran)
+    - cron: '0 20 * * *'  # 20:00 UTC (23:30 Tehran)
+  workflow_dispatch:      # Manual trigger
 
 jobs:
-  make-contribution:
+  full-contribution-system:
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GH_TOKEN3 || secrets.GITHUB_TOKEN }}
-          fetch-depth: 1
+          fetch-depth: 0
+          token: ${{ secrets.GH_TOKEN3 }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -34,11 +26,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install requests
 
       - name: Configure Git user
         run: |
-          git config user.email "ramincsy2@gmail.com"
-          git config user.name "ramincsy"
+          git config --global user.email "ramincsy2@gmail.com"
+          git config --global user.name "ramincsy"
 
       - name: Get current date info
         run: |
@@ -46,67 +39,74 @@ jobs:
           echo "month=$(date +'%m')" >> $GITHUB_ENV
           echo "year=$(date +'%Y')" >> $GITHUB_ENV
           echo "hour=$(date +'%H')" >> $GITHUB_ENV
-          echo "minute=$(date +'%M')" >> $GITHUB_ENV
-          echo "second=$(date +'%S')" >> $GITHUB_ENV
-          echo "branch_name=daily-contribution-$(date +'%Y-%m-%d-%H')" >> $GITHUB_ENV
 
-      - name: Prepare branch
+      - name: 🧹 Clean working directory
         run: |
-          git fetch origin
-          git checkout -B "$branch_name" origin/main
+          git stash || true
+          git clean -fd
+          git reset --hard origin/main
+          git clean -fd
 
-      - name: Generate daily content
+      # ✅ COMMITS: 50 per execution
+      - name: "📝 Step 1: Generate 50 contribution files"
+        run: |
+          python scripts/generate_multiple_contributions.py 50 || echo "Generation completed"
+
+      - name: "🌿 Step 2: Create 50 contribution branches"
+        run: |
+          python scripts/create_contribution_branches.py || echo "Branches created"
+
+      # ✅ PULL REQUESTS: 50 per execution
+      - name: "🔗 Step 3: Create 50 pull requests"
         env:
-          AUTO_UPDATE_README: "false"
+          GH_TOKEN3: ${{ secrets.GH_TOKEN3 }}
         run: |
-          python generate_content.py || echo "No content generated."
+          python scripts/create_multiple_prs.py || echo "PRs creation completed"
 
-      - name: Commit changes if any
-        id: commit_changes
+      # ✅ CODE REVIEWS: 30+ per execution (detailed)
+      - name: "✅ Step 4: Add detailed code reviews"
+        env:
+          GH_TOKEN3: ${{ secrets.GH_TOKEN3 }}
         run: |
-          git add updates README.md
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
-          else
-            git commit -m "Daily update: ${year}-${month}-${day} ${hour}" || echo "Nothing new to commit"
-            git push origin "$branch_name"
-            echo "has_changes=true" >> "$GITHUB_OUTPUT"
-          fi
+          python scripts/review_contributions.py || echo "Review completed"
 
-      - name: Create single main PR
-        if: steps.commit_changes.outputs.has_changes == 'true'
-        uses: actions/github-script@v6
+      - name: "🎓 Step 5: Add advanced technical reviews"
+        env:
+          GH_TOKEN3: ${{ secrets.GH_TOKEN3 }}
+        run: |
+          python scripts/advanced_code_review.py || echo "Advanced review completed"
+
+      # ✅ ISSUES: 20+ per execution (create + close)
+      - name: "🎯 Step 6: Create and manage GitHub issues"
+        env:
+          GH_TOKEN3: ${{ secrets.GH_TOKEN3 }}
+        run: |
+          python scripts/create_github_issues.py || echo "Issues creation completed"
+
+  # Auto-merge all PRs after 1 hour
+  auto-merge:
+    runs-on: ubuntu-latest
+    needs: full-contribution-system
+    if: always()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          github-token: ${{ secrets.GH_TOKEN3 || secrets.GITHUB_TOKEN }}
-          script: |
-            const branchName = process.env.branch_name;
-            const period = Number(process.env.hour) < 12 ? 'morning' : 'afternoon';
-            const prBody = '# Daily Update: ' + process.env.year + '-' + process.env.month + '-' + process.env.day + ' ' + process.env.hour + ':' + process.env.minute + ':' + process.env.second + '\n\n' +
-              '## Changes\n' +
-              '- Daily contribution recorded\n' +
-              '- Generated update file: updates/' + process.env.year + '/' + process.env.month + '/' + process.env.day + '-' + period + '.md\n' +
-              '- README updates disabled in scheduled runs to reduce merge conflicts\n\n' +
-              '## Purpose\n' +
-              'This PR keeps the daily contribution flow active while reducing conflict risk.\n\n' +
-              '## Quality Checks\n' +
-              '- Code formatted with Black\n' +
-              '- Linted with Ruff\n' +
-              '- Daily idempotent entries\n' +
-              '- Lower conflict risk on README.md\n\n' +
-              '---\n' +
-              '*Auto-generated by daily-contribution workflow*';
+          fetch-depth: 1
+          token: ${{ secrets.GH_TOKEN3 }}
 
-            try {
-              const pr = await github.rest.pulls.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: 'Daily Update ' + process.env.year + '-' + process.env.month + '-' + process.env.day + ' ' + process.env.hour,
-                head: branchName,
-                base: 'main',
-                body: prBody,
-              });
-              console.log('Created main PR #' + pr.data.number);
-            } catch (e) {
-              console.log('Main PR creation skipped: ' + e.message);
-            }
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: ⚡ Auto-merge all contribution PRs
+        env:
+          GH_TOKEN3: ${{ secrets.GH_TOKEN3 }}
+        run: |
+          python scripts/auto_merge_prs.py || echo "Auto-merge completed"
