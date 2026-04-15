@@ -17,4 +17,6 @@
 ## Cleanup Notes
 
 - The older `complete-contribution.yml` workflow was removed because it created too much noise and too many worker-style actions for the default repository path.
-- Bulk helper scripts remain available, but only through manual execution.
+- Bulk helper scripts remain available, but only through manual execution outside the default Actions path.
+- The daily workflow now only creates the main scheduled PR and no longer runs bulk helper steps or best-effort pre-commit checks.
+- The active workflows now declare explicit permissions, concurrency groups, and timeouts to keep runs more predictable.

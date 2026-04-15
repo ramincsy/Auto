@@ -2,13 +2,22 @@ name: Auto Merge Daily PRs
 
 on:
   schedule:
-    - cron: '0 1 * * *'   # Run 1 hour after morning contribution (01:00 UTC)
-    - cron: '0 13 * * *'  # Run 1 hour after afternoon contribution (13:00 UTC)
-  workflow_dispatch:  # Allow manual trigger
+    - cron: '0 1 * * *'
+    - cron: '0 13 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: auto-merge-daily-prs
+  cancel-in-progress: false
 
 jobs:
   auto-merge:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
