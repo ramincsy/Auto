@@ -18,6 +18,8 @@ from datetime import datetime
 def get_github_token():
     """Get GitHub token from environment."""
     token = os.environ.get('GH_TOKEN3') or os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN')
+    if token and not os.environ.get('GH_TOKEN3'):
+        print("⚠️ Warning: Using fallback GitHub token. Set GH_TOKEN3 to a personal access token so reviews and PR creation count on your GitHub profile.")
     if not token:
         print("❌ Error: No GitHub token found.")
         sys.exit(1)

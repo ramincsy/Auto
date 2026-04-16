@@ -10,12 +10,21 @@ on:
 jobs:
   generate-contributions:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN3: ${{ secrets.GH_TOKEN3 }}
     steps:
+      - name: Verify personal GH_TOKEN3 secret
+        run: |
+          if [ -z "${GH_TOKEN3}" ]; then
+            echo "❌ GH_TOKEN3 secret is not configured. Add your personal GitHub token to repository Secrets."
+            exit 1
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-          token: ${{ secrets.GH_TOKEN3 || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN3 }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -55,22 +64,22 @@ jobs:
       - name: Create 50 PRs
         run: python scripts/create_multiple_prs.py 50
         env:
-          GH_TOKEN3: ${{ secrets.GH_TOKEN3 || secrets.GITHUB_TOKEN }}
+          GH_TOKEN3: ${{ secrets.GH_TOKEN3 }}
 
       - name: Add code reviews to PRs
         run: python scripts/advanced_code_review.py 30
         env:
-          GH_TOKEN3: ${{ secrets.GH_TOKEN3 || secrets.GITHUB_TOKEN }}
+          GH_TOKEN3: ${{ secrets.GH_TOKEN3 }}
 
       - name: Approve PRs
         run: python scripts/review_contributions.py 30
         env:
-          GH_TOKEN3: ${{ secrets.GH_TOKEN3 || secrets.GITHUB_TOKEN }}
+          GH_TOKEN3: ${{ secrets.GH_TOKEN3 }}
 
       - name: Create GitHub issues
-        run: python scripts/create_github_issues.py 20
+        run: echo "Issues creation skipped - script not implemented yet"
         env:
-          GH_TOKEN3: ${{ secrets.GH_TOKEN3 || secrets.GITHUB_TOKEN }}
+          GH_TOKEN3: ${{ secrets.GH_TOKEN3 }}
 
       - name: Commit and push changes
         run: |
@@ -81,12 +90,21 @@ jobs:
   auto-merge:
     needs: generate-contributions
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN3: ${{ secrets.GH_TOKEN3 }}
     steps:
+      - name: Verify personal GH_TOKEN3 secret
+        run: |
+          if [ -z "${GH_TOKEN3}" ]; then
+            echo "❌ GH_TOKEN3 secret is not configured. Add your personal GitHub token to repository Secrets."
+            exit 1
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-          token: ${{ secrets.GH_TOKEN3 || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN3 }}
 
       - name: Set up Python
         uses: actions/setup-python@v4

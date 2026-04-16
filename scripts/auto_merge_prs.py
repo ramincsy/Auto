@@ -14,6 +14,8 @@ import requests
 
 def get_github_token() -> str:
     token = os.environ.get("GH_TOKEN3") or os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if token and not os.environ.get("GH_TOKEN3"):
+        print("⚠️ Warning: Using fallback GitHub token. Set GH_TOKEN3 to a personal access token for deterministic workflow behavior.")
     if not token:
         print("Error: No GitHub token found.")
         sys.exit(1)
