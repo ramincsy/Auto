@@ -30,10 +30,10 @@ year, month, day = date_str.split("-")
 for i in range(5):  # Test with 5 files
     folder = Path("updates") / year / month
     folder.mkdir(parents=True, exist_ok=True)
-    
+
     filename = f"{day}-contribution-{i}.md"
     filepath = folder / filename
-    
+
     if not filepath.exists():
         content = f"""# Contribution #{i} - {date_str}
 

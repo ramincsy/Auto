@@ -13,9 +13,15 @@ import requests
 
 
 def get_github_token() -> str:
-    token = os.environ.get("GH_TOKEN3") or os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    token = (
+        os.environ.get("GH_TOKEN3")
+        or os.environ.get("GITHUB_TOKEN")
+        or os.environ.get("GH_TOKEN")
+    )
     if token and not os.environ.get("GH_TOKEN3"):
-        print("⚠️ Warning: Using fallback GitHub token. Set GH_TOKEN3 to a personal access token for deterministic workflow behavior.")
+        print(
+            "⚠️ Warning: Using fallback GitHub token. Set GH_TOKEN3 to a personal access token for deterministic workflow behavior."
+        )
     if not token:
         print("Error: No GitHub token found.")
         sys.exit(1)
@@ -52,7 +58,15 @@ def get_open_prs(owner: str, repo: str, token: str) -> List[Dict]:
 
 def is_daily_pr(pr: Dict) -> bool:
     title = pr.get("title", "")
-    return any(marker in title for marker in ["Daily Update", "daily-contribution", "Contribution #", "Contribution "])
+    return any(
+        marker in title
+        for marker in [
+            "Daily Update",
+            "daily-contribution",
+            "Contribution #",
+            "Contribution ",
+        ]
+    )
 
 
 def pr_sort_key(pr: Dict) -> datetime:
@@ -120,7 +134,9 @@ def merge_pr(owner: str, repo: str, pr_number: int, token: str) -> bool:
     return False
 
 
-def wait_for_mergeable(owner: str, repo: str, pr_number: int, token: str, retries: int = 4, delay: int = 5) -> Dict:
+def wait_for_mergeable(
+    owner: str, repo: str, pr_number: int, token: str, retries: int = 4, delay: int = 5
+) -> Dict:
     details = check_pr_details(owner, repo, pr_number, token)
     attempts = 0
     while attempts < retries and details["mergeable"] is None:
@@ -137,7 +153,10 @@ def wait_after_update(owner: str, repo: str, pr_number: int, token: str) -> Dict
         print(f"  Rechecking PR #{pr_number} after branch update ({attempt}/4)...")
         time.sleep(10)
         details = wait_for_mergeable(owner, repo, pr_number, token, retries=2, delay=3)
-        if details.get("mergeable") is True or details.get("mergeable_state") == "clean":
+        if (
+            details.get("mergeable") is True
+            or details.get("mergeable_state") == "clean"
+        ):
             break
     return details
 
@@ -190,7 +209,9 @@ def main() -> None:
             continue
 
         if not mergeable:
-            print(f"  PR #{pr_number} is not mergeable after retry (state: {mergeable_state})")
+            print(
+                f"  PR #{pr_number} is not mergeable after retry (state: {mergeable_state})"
+            )
             failed_count += 1
             if mergeable_state == "dirty":
                 conflict_count += 1

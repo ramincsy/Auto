@@ -34,13 +34,10 @@ def count_commits():
     """Count total commits."""
     try:
         result = subprocess.run(
-            "git log --all --oneline",
-            shell=True,
-            capture_output=True,
-            text=True
+            "git log --all --oneline", shell=True, capture_output=True, text=True
         )
         if result.returncode == 0:
-            lines = result.stdout.strip().split('\n')
+            lines = result.stdout.strip().split("\n")
             return len([l for l in lines if l])
     except:
         pass
@@ -51,14 +48,11 @@ def count_merged_prs():
     """Count merged PRs."""
     try:
         result = subprocess.run(
-            "git log --all --oneline",
-            shell=True,
-            capture_output=True,
-            text=True
+            "git log --all --oneline", shell=True, capture_output=True, text=True
         )
         if result.returncode == 0:
-            lines = result.stdout.strip().split('\n')
-            return len([l for l in lines if 'Merge pull request' in l])
+            lines = result.stdout.strip().split("\n")
+            return len([l for l in lines if "Merge pull request" in l])
     except:
         pass
     return 0
@@ -85,18 +79,18 @@ def check_scripts():
         "cleanup_branches.py",
         "close_old_prs.py",
     ]
-    
+
     scripts_dir = Path("scripts")
     existing = []
     missing = []
-    
+
     for script in scripts:
         script_path = scripts_dir / script
         if script_path.exists():
             existing.append(script)
         else:
             missing.append(script)
-    
+
     return existing, missing
 
 
@@ -104,11 +98,11 @@ def check_workflows():
     """Check if workflow files exist."""
     workflows_dir = Path(".github/workflows")
     workflows = []
-    
+
     if workflows_dir.exists():
         for wf in workflows_dir.glob("*.yml"):
             workflows.append(wf.name)
-    
+
     return workflows
 
 
@@ -116,7 +110,7 @@ def main():
     """Main validation function."""
     print("🔍 GitHub Contribution System - Final Validation\n")
     print("=" * 60)
-    
+
     # 1. Check git repository
     print("\n1️⃣  Repository Status:")
     if check_git_repo():
@@ -124,45 +118,45 @@ def main():
     else:
         print("   ❌ Not in a git repository")
         return False
-    
+
     # 2. Count commits
     print("\n2️⃣  Commit Statistics:")
     total_commits = count_commits()
     merged_prs = count_merged_prs()
     print(f"   📊 Total commits: {total_commits}")
     print(f"   🔄 Merged PRs: {merged_prs}")
-    
+
     if total_commits > 100:
         print("   ✅ Plenty of commit history")
     elif total_commits > 50:
         print("   ⚠️  Moderate commit history")
     else:
         print("   ⚠️  Limited commit history")
-    
+
     # 3. Check contribution files
     print("\n3️⃣  Contribution Files:")
     contrib_count = check_contribution_files()
     print(f"   📁 Total contribution files: {contrib_count}")
-    
+
     if contrib_count > 100:
         print("   ✅ Plenty of contribution files")
     else:
         print("   ⚠️  Could generate more files")
-    
+
     # 4. Check scripts
     print("\n4️⃣  Automation Scripts:")
     existing, missing = check_scripts()
     print(f"   ✅ Found {len(existing)} scripts")
     for script in existing:
         print(f"      • {script}")
-    
+
     if missing:
         print(f"   ❌ Missing {len(missing)} scripts")
         for script in missing:
             print(f"      • {script}")
     else:
         print("   ✅ All required scripts present")
-    
+
     # 5. Check workflows
     print("\n5️⃣  GitHub Actions Workflows:")
     workflows = check_workflows()
@@ -172,7 +166,7 @@ def main():
             print(f"      • {wf}")
     else:
         print("   ❌ No workflows found")
-    
+
     # 6. Achievement readiness
     print("\n6️⃣  GitHub Achievements Status:")
     print("   🦈 Pull Shark: ✅ Ready")
@@ -187,13 +181,13 @@ def main():
     print("      (2 months required, started 01/2025)")
     print("   👯 Pair Extraordinaire: 🎯 In Progress")
     print("      (Need co-authored commits)")
-    
+
     # 7. Final Status
     print("\n" + "=" * 60)
     print("\n✨ SYSTEM VALIDATION COMPLETE\n")
-    
+
     all_ok = len(missing) == 0 and len(workflows) > 0
-    
+
     if all_ok and merged_prs > 50:
         print("🎉 System is fully operational!")
         print("✅ All automated processes working")

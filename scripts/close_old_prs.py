@@ -17,7 +17,11 @@ from datetime import datetime, timedelta, timezone
 
 def get_github_token():
     """Get GitHub token from environment."""
-    token = os.environ.get('GH_TOKEN3') or os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN')
+    token = (
+        os.environ.get("GH_TOKEN3")
+        or os.environ.get("GITHUB_TOKEN")
+        or os.environ.get("GH_TOKEN")
+    )
     if not token:
         print("❌ Error: No GitHub token found.")
         sys.exit(1)
@@ -26,8 +30,8 @@ def get_github_token():
 
 def get_repo_info():
     """Get repository info."""
-    repo = os.environ.get('GITHUB_REPOSITORY', 'ramincsy/Auto')
-    owner, repo_name = repo.split('/', 1)
+    repo = os.environ.get("GITHUB_REPOSITORY", "ramincsy/Auto")
+    owner, repo_name = repo.split("/", 1)
     return owner, repo_name
 
 
@@ -36,13 +40,10 @@ def get_old_contribution_prs(owner, repo, token, days_old=7):
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls"
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
 
-    params = {
-        "state": "open",
-        "per_page": 100
-    }
+    params = {"state": "open", "per_page": 100}
 
     cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_old)
 
@@ -56,11 +57,11 @@ def get_old_contribution_prs(owner, repo, token, days_old=7):
         old_prs = []
 
         for pr in all_prs:
-            created_at_str = pr['created_at'].replace('Z', '+00:00')
+            created_at_str = pr["created_at"].replace("Z", "+00:00")
             created_at = datetime.fromisoformat(created_at_str)
             if created_at < cutoff_date:
-                title = pr.get('title', '')
-                if 'Daily Update' in title or 'Contribution #' in title:
+                title = pr.get("title", "")
+                if "Daily Update" in title or "Contribution #" in title:
                     old_prs.append(pr)
 
         return old_prs
@@ -78,12 +79,10 @@ def close_pr(owner, repo, token, pr_number, pr_title, dry_run=False):
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}"
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
 
-    data = {
-        "state": "closed"
-    }
+    data = {"state": "closed"}
 
     try:
         response = requests.patch(url, json=data, headers=headers, timeout=30)
@@ -91,7 +90,9 @@ def close_pr(owner, repo, token, pr_number, pr_title, dry_run=False):
             print(f"    ✅ Closed PR #{pr_number}: {pr_title}")
             return True
         else:
-            print(f"    ❌ Error closing PR #{pr_number} (status: {response.status_code})")
+            print(
+                f"    ❌ Error closing PR #{pr_number} (status: {response.status_code})"
+            )
             return False
     except Exception as e:
         print(f"    ❌ Error: {str(e)}")
@@ -123,9 +124,9 @@ def main():
 
     # Close each PR
     for pr in old_prs:
-        pr_number = pr['number']
-        pr_title = pr['title']
-        created_at = pr['created_at']
+        pr_number = pr["number"]
+        pr_title = pr["title"]
+        created_at = pr["created_at"]
 
         print(f"  Processing PR #{pr_number}: {pr_title} (created: {created_at})")
 

@@ -17,7 +17,9 @@ import subprocess
 def run_git_command(command):
     """Run a git command and return output."""
     try:
-        result = subprocess.run(command, shell=True, capture_output=True, text=True, cwd=os.getcwd())
+        result = subprocess.run(
+            command, shell=True, capture_output=True, text=True, cwd=os.getcwd()
+        )
         return result.returncode == 0, result.stdout.strip(), result.stderr.strip()
     except Exception as e:
         return False, "", str(e)
@@ -25,17 +27,19 @@ def run_git_command(command):
 
 def get_contribution_branches():
     """Get list of all contribution branches."""
-    success, stdout, stderr = run_git_command('git branch -r')
+    success, stdout, stderr = run_git_command("git branch -r")
 
     if not success:
         print(f"❌ Error getting branches: {stderr}")
         return []
 
     branches = []
-    for line in stdout.split('\n'):
+    for line in stdout.split("\n"):
         line = line.strip()
-        if 'origin/' in line and ('contribution-' in line or 'daily-contribution-' in line):
-            branch_name = line.replace('origin/', '')
+        if "origin/" in line and (
+            "contribution-" in line or "daily-contribution-" in line
+        ):
+            branch_name = line.replace("origin/", "")
             branches.append(branch_name)
 
     return branches
@@ -47,7 +51,7 @@ def delete_remote_branch(branch_name, dry_run=False):
         print(f"    [DRY RUN] Would delete branch: {branch_name}")
         return True
 
-    success, stdout, stderr = run_git_command(f'git push origin --delete {branch_name}')
+    success, stdout, stderr = run_git_command(f"git push origin --delete {branch_name}")
 
     if success:
         print(f"    ✅ Deleted branch: {branch_name}")

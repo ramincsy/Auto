@@ -18,7 +18,11 @@ from datetime import datetime
 
 def get_github_token():
     """Get GitHub token from environment."""
-    token = os.environ.get('GH_TOKEN3') or os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN')
+    token = (
+        os.environ.get("GH_TOKEN3")
+        or os.environ.get("GITHUB_TOKEN")
+        or os.environ.get("GH_TOKEN")
+    )
     if not token:
         print("❌ Error: No GitHub token found.")
         sys.exit(1)
@@ -27,15 +31,17 @@ def get_github_token():
 
 def get_repo_info():
     """Get repository info."""
-    repo = os.environ.get('GITHUB_REPOSITORY', 'ramincsy/Auto')
-    owner, repo_name = repo.split('/', 1)
+    repo = os.environ.get("GITHUB_REPOSITORY", "ramincsy/Auto")
+    owner, repo_name = repo.split("/", 1)
     return owner, repo_name
 
 
 def run_git_command(command):
     """Run a git command and return output."""
     try:
-        result = subprocess.run(command, shell=True, capture_output=True, text=True, cwd=os.getcwd())
+        result = subprocess.run(
+            command, shell=True, capture_output=True, text=True, cwd=os.getcwd()
+        )
         return result.returncode == 0, result.stdout.strip(), result.stderr.strip()
     except Exception as e:
         return False, "", str(e)
@@ -43,17 +49,17 @@ def run_git_command(command):
 
 def get_merged_contribution_branches():
     """Get list of merged contribution branches."""
-    success, stdout, stderr = run_git_command('git branch -r --merged origin/main')
+    success, stdout, stderr = run_git_command("git branch -r --merged origin/main")
 
     if not success:
         print(f"❌ Error getting merged branches: {stderr}")
         return []
 
     branches = []
-    for line in stdout.split('\n'):
+    for line in stdout.split("\n"):
         line = line.strip()
-        if 'origin/contribution-' in line and 'HEAD' not in line:
-            branch_name = line.replace('origin/', '')
+        if "origin/contribution-" in line and "HEAD" not in line:
+            branch_name = line.replace("origin/", "")
             branches.append(branch_name)
 
     return branches
@@ -65,7 +71,7 @@ def delete_remote_branch(branch_name, dry_run=False):
         print(f"    [DRY RUN] Would delete branch: {branch_name}")
         return True
 
-    success, stdout, stderr = run_git_command(f'git push origin --delete {branch_name}')
+    success, stdout, stderr = run_git_command(f"git push origin --delete {branch_name}")
 
     if success:
         print(f"    ✅ Deleted branch: {branch_name}")

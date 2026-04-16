@@ -13,7 +13,6 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-
 TOPICS_FILE = Path("config/topics.json")
 DEFAULT_TOPICS = [
     "AI & Machine Learning",

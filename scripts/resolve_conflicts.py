@@ -13,7 +13,11 @@ import requests
 
 
 def get_github_token() -> str:
-    token = os.environ.get("GH_TOKEN3") or os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    token = (
+        os.environ.get("GH_TOKEN3")
+        or os.environ.get("GITHUB_TOKEN")
+        or os.environ.get("GH_TOKEN")
+    )
     if not token:
         print("Error: No GitHub token found.")
         sys.exit(1)
@@ -87,7 +91,9 @@ def update_pr_branch(owner: str, repo: str, pr_number: int, token: str) -> bool:
     return False
 
 
-def merge_pr(owner: str, repo: str, pr_number: int, token: str, merge_method: str = "squash") -> bool:
+def merge_pr(
+    owner: str, repo: str, pr_number: int, token: str, merge_method: str = "squash"
+) -> bool:
     try:
         response = requests.put(
             f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/merge",
@@ -164,7 +170,13 @@ def analyze_conflicts(owner: str, repo: str, token: str) -> Dict:
     }
 
 
-def auto_resolve_conflicts(owner: str, repo: str, conflicted_prs: List[Dict], token: str, force_merge: bool = False) -> Dict:
+def auto_resolve_conflicts(
+    owner: str,
+    repo: str,
+    conflicted_prs: List[Dict],
+    token: str,
+    force_merge: bool = False,
+) -> Dict:
     print("\nAttempting to resolve conflicts...\n")
 
     resolved = 0
@@ -209,7 +221,9 @@ def auto_resolve_conflicts(owner: str, repo: str, conflicted_prs: List[Dict], to
     return {"resolved": resolved, "merged": merged, "failed": failed}
 
 
-def print_manual_resolution_guide(conflicted_prs: List[Dict], owner: str, repo: str) -> None:
+def print_manual_resolution_guide(
+    conflicted_prs: List[Dict], owner: str, repo: str
+) -> None:
     if not conflicted_prs:
         return
 

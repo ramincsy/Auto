@@ -28,7 +28,11 @@ from typing import List, Dict, Optional
 
 def get_github_token() -> str:
     """Get GitHub token from environment variables."""
-    token = os.environ.get("GH_TOKEN3") or os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    token = (
+        os.environ.get("GH_TOKEN3")
+        or os.environ.get("GITHUB_TOKEN")
+        or os.environ.get("GH_TOKEN")
+    )
     if not token:
         print("❌ Error: No GitHub token found.")
         print("Please set GH_TOKEN3, GITHUB_TOKEN, or GH_TOKEN environment variable.")

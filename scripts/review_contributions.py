@@ -17,9 +17,15 @@ from datetime import datetime
 
 def get_github_token():
     """Get GitHub token from environment."""
-    token = os.environ.get('GH_TOKEN3') or os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN')
-    if token and not os.environ.get('GH_TOKEN3'):
-        print("⚠️ Warning: Using fallback GitHub token. Set GH_TOKEN3 to a personal access token so reviews and PR creation count on your GitHub profile.")
+    token = (
+        os.environ.get("GH_TOKEN3")
+        or os.environ.get("GITHUB_TOKEN")
+        or os.environ.get("GH_TOKEN")
+    )
+    if token and not os.environ.get("GH_TOKEN3"):
+        print(
+            "⚠️ Warning: Using fallback GitHub token. Set GH_TOKEN3 to a personal access token so reviews and PR creation count on your GitHub profile."
+        )
     if not token:
         print("❌ Error: No GitHub token found.")
         sys.exit(1)
@@ -28,8 +34,8 @@ def get_github_token():
 
 def get_repo_info():
     """Get repository info."""
-    repo = os.environ.get('GITHUB_REPOSITORY', 'ramincsy/Auto')
-    owner, repo_name = repo.split('/', 1)
+    repo = os.environ.get("GITHUB_REPOSITORY", "ramincsy/Auto")
+    owner, repo_name = repo.split("/", 1)
     return owner, repo_name
 
 
@@ -53,7 +59,7 @@ def get_date_string():
     hour = os.getenv("hour")
     minute = os.getenv("minute")
     second = os.getenv("second")
-    
+
     if not (year and month and day):
         now = datetime.now()
         year = now.strftime("%Y")
@@ -62,7 +68,7 @@ def get_date_string():
         hour = now.strftime("%H")
         minute = now.strftime("%M")
         second = now.strftime("%S")
-    
+
     result = f"{year}-{month}-{day}"
     if hour:
         result += f"-{hour}"
@@ -78,29 +84,26 @@ def get_contribution_prs(owner, repo, token, date_str):
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls"
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
-    
-    params = {
-        "state": "open",
-        "per_page": 100
-    }
-    
+
+    params = {"state": "open", "per_page": 100}
+
     try:
         response = requests.get(url, headers=headers, params=params, timeout=30)
         if response.status_code != 200:
             print(f"❌ Error fetching PRs: {response.status_code}")
             return []
-        
+
         all_prs = response.json()
-        
+
         # Filter for contribution PRs from today
         contribution_prs = []
         for pr in all_prs:
-            title = pr.get('title', '')
+            title = pr.get("title", "")
             if f"Contribution #" in title and date_str in title:
                 contribution_prs.append(pr)
-        
+
         return contribution_prs
     except Exception as e:
         print(f"❌ Error: {str(e)}")
@@ -112,7 +115,7 @@ def submit_review(owner, repo, token, pr_number, approve=False):
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/reviews"
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
 
     event = "APPROVE" if approve else "COMMENT"
@@ -124,7 +127,7 @@ def submit_review(owner, repo, token, pr_number, approve=False):
 This review was created by the repository's bulk contribution helper.
 It confirms that the PR matches the generated contribution workflow pattern.
 It does not replace a human review of correctness, safety, or content quality.
-"""
+""",
     }
 
     try:
@@ -150,35 +153,35 @@ def main():
     owner, repo = get_repo_info()
     date_str = get_date_string()
     approve = should_approve()
-    
+
     mode = "approval" if approve else "comment"
     print(f"Reviewing contribution PRs for {date_str} using {mode} mode...\n")
-    
+
     # Get contribution PRs
     prs = get_contribution_prs(owner, repo, token, date_str)
-    
+
     if not prs:
         print(f"⚠️  No contribution PRs found for {date_str}")
         return 0
-    
+
     print(f"Found {len(prs)} contribution PR(s) to review:\n")
-    
+
     reviewed_count = 0
-    
+
     # Review and approve each PR
     for pr in prs:
-        pr_number = pr['number']
-        pr_title = pr['title']
+        pr_number = pr["number"]
+        pr_title = pr["title"]
         print(f"  Reviewing PR #{pr_number}: {pr_title}")
 
         if submit_review(owner, repo, token, pr_number, approve=approve):
             reviewed_count += 1
-    
+
     if reviewed_count > 0:
         print(f"\n✨ Successfully reviewed and approved {reviewed_count} PR(s)!")
     else:
         print(f"\n⚠️  No PRs were successfully reviewed")
-    
+
     return reviewed_count
 
 

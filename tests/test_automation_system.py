@@ -30,7 +30,7 @@ test_results = {
     "workflow_files": [],
     "github_status": [],
     "token_config": [],
-    "overall": "PENDING"
+    "overall": "PENDING",
 }
 
 print("=" * 80)
@@ -51,31 +51,33 @@ scripts_to_test = [
     "scripts/auto_merge_prs.py",
     "scripts/resolve_conflicts.py",
     "scripts/pr_status_report.py",
-    "scripts/merge_daily_updates.py"
+    "scripts/merge_daily_updates.py",
 ]
 
 print("\n1.1 Testing error handling without token...")
 # Clear token
-os.environ.pop('GH_TOKEN3', None)
-os.environ.pop('GITHUB_TOKEN', None)
-os.environ.pop('GH_TOKEN', None)
+os.environ.pop("GH_TOKEN3", None)
+os.environ.pop("GITHUB_TOKEN", None)
+os.environ.pop("GH_TOKEN", None)
 
 for script in scripts_to_test:
     if not Path(script).exists():
-        test_results["python_scripts"].append({
-            "script": script,
-            "test": "File existence",
-            "status": "❌ FAIL",
-            "detail": "Script not found"
-        })
+        test_results["python_scripts"].append(
+            {
+                "script": script,
+                "test": "File existence",
+                "status": "❌ FAIL",
+                "detail": "Script not found",
+            }
+        )
         continue
-    
+
     print(f"\nTesting: {script}")
-    
+
     # Read the script
-    with open(script, 'r', encoding='utf-8') as f:
+    with open(script, "r", encoding="utf-8") as f:
         content = f.read()
-    
+
     # Check 1: GH_TOKEN3 priority
     checks = {
         "Has GH_TOKEN3 check": "GH_TOKEN3" in content,
@@ -83,17 +85,19 @@ for script in scripts_to_test:
         "Checks GH_TOKEN": "GH_TOKEN" in content,
         "Error handling": "if not token" in content or "sys.exit" in content,
         "Uses Bearer auth": "Bearer" in content or "token {" in content,
-        "Error message": "Error: No GitHub token" in content or "❌ Error" in content
+        "Error message": "Error: No GitHub token" in content or "❌ Error" in content,
     }
-    
+
     for check_name, result in checks.items():
         status = "✅ PASS" if result else "⚠️  WARN"
-        test_results["python_scripts"].append({
-            "script": script,
-            "test": check_name,
-            "status": status,
-            "detail": "Found" if result else "Not found"
-        })
+        test_results["python_scripts"].append(
+            {
+                "script": script,
+                "test": check_name,
+                "status": status,
+                "detail": "Found" if result else "Not found",
+            }
+        )
         print(f"  {status} {check_name}")
 
 # ============================================================================
@@ -106,64 +110,72 @@ print("=" * 80)
 workflow_files = [
     ".github/workflows/auto-merge.yml",
     ".github/workflows/daily-contribution.yml",
-    ".github/workflows/code-quality.yml"
+    ".github/workflows/code-quality.yml",
 ]
 
 for workflow_file in workflow_files:
     if not Path(workflow_file).exists():
-        test_results["workflow_files"].append({
-            "file": workflow_file,
-            "test": "File existence",
-            "status": "❌ FAIL",
-            "detail": "File not found"
-        })
+        test_results["workflow_files"].append(
+            {
+                "file": workflow_file,
+                "test": "File existence",
+                "status": "❌ FAIL",
+                "detail": "File not found",
+            }
+        )
         continue
-    
+
     print(f"\nTesting: {workflow_file}")
-    
+
     # Read and validate YAML syntax (basic check)
-    with open(workflow_file, 'r', encoding='utf-8') as f:
+    with open(workflow_file, "r", encoding="utf-8") as f:
         content = f.read()
         # Basic YAML validation - check for common syntax errors
         yaml_valid = True
-        if content.count(':') > 5 and content.count('\n') > 5:
+        if content.count(":") > 5 and content.count("\n") > 5:
             yaml_valid = True
             print(f"  ✅ PASS YAML structure looks valid")
-            test_results["workflow_files"].append({
-                "file": workflow_file,
-                "test": "YAML syntax",
-                "status": "✅ PASS",
-                "detail": "YAML structure valid"
-            })
+            test_results["workflow_files"].append(
+                {
+                    "file": workflow_file,
+                    "test": "YAML syntax",
+                    "status": "✅ PASS",
+                    "detail": "YAML structure valid",
+                }
+            )
         else:
             yaml_valid = False
             print(f"  ❌ FAIL YAML structure issue detected")
-            test_results["workflow_files"].append({
-                "file": workflow_file,
-                "test": "YAML syntax",
-                "status": "⚠️  WARN",
-                "detail": "YAML structure may have issues"
-            })
-    
+            test_results["workflow_files"].append(
+                {
+                    "file": workflow_file,
+                    "test": "YAML syntax",
+                    "status": "⚠️  WARN",
+                    "detail": "YAML structure may have issues",
+                }
+            )
+
     # Check for GH_TOKEN3 usage
-    with open(workflow_file, 'r', encoding='utf-8') as f:
+    with open(workflow_file, "r", encoding="utf-8") as f:
         content = f.read()
-    
+
     checks = {
         "Uses GH_TOKEN3": "GH_TOKEN3" in content,
         "Uses secrets": "secrets" in content,
         "Has jobs defined": "jobs:" in content,
-        "Proper indentation": content.count('\n') > 5
+        "Proper indentation": content.count("\n") > 5,
     }
-    
+
     for check_name, result in checks.items():
         status = "✅ PASS" if result else "⚠️  WARN"
-        test_results["workflow_files"].append({
-            "file": workflow_file,
-            "test": check_name,
-            "status": status,
-            "detail": "Yes" if result else "No"
-        })
+        test_results["workflow_files"].append(
+            {
+                "file": workflow_file,
+                "test": check_name,
+                "status": status,
+                "detail": "Yes" if result else "No",
+            }
+        )
         print(f"  {status} {check_name}")
 
 # ============================================================================
@@ -178,29 +190,37 @@ print("\n3.1 Checking token priority chain in scripts...")
 for script in scripts_to_test:
     if not Path(script).exists():
         continue
-    
-    with open(script, 'r', encoding='utf-8') as f:
+
+    with open(script, "r", encoding="utf-8") as f:
         content = f.read()
-    
+
     # Check token priority order
     if "GH_TOKEN3" in content:
         idx_gh3 = content.find("GH_TOKEN3")
-        idx_github = content.find("GITHUB_TOKEN", idx_gh3) if "GITHUB_TOKEN" in content else 9999
-        idx_gh = content.find("GH_TOKEN", idx_github) if "GH_TOKEN" in content[idx_github:] else 9999
-        
+        idx_github = (
+            content.find("GITHUB_TOKEN", idx_gh3) if "GITHUB_TOKEN" in content else 9999
+        )
+        idx_gh = (
+            content.find("GH_TOKEN", idx_github)
+            if "GH_TOKEN" in content[idx_github:]
+            else 9999
+        )
+
         if idx_gh3 < idx_github and idx_github < idx_gh:
             status = "✅ PASS"
             detail = "GH_TOKEN3 → GITHUB_TOKEN → GH_TOKEN"
         else:
             status = "⚠️  WARN"
             detail = "Priority order may not be correct"
-        
-        test_results["token_config"].append({
-            "script": script,
-            "test": "Token priority",
-            "status": status,
-            "detail": detail
-        })
+
+        test_results["token_config"].append(
+            {
+                "script": script,
+                "test": "Token priority",
+                "status": status,
+                "detail": detail,
+            }
+        )
         print(f"  {status} {script}: {detail}")
 
 # ============================================================================
@@ -212,23 +232,29 @@ print("=" * 80)
 
 print("\n4.1 Checking auto_merge_prs.py implementation...")
 
-with open("scripts/auto_merge_prs.py", 'r', encoding='utf-8') as f:
+with open("scripts/auto_merge_prs.py", "r", encoding="utf-8") as f:
     auto_merge_content = f.read()
 
 checks = {
-    "Filters daily PRs": "Daily Update" in auto_merge_content or "daily-contribution" in auto_merge_content,
+    "Filters daily PRs": "Daily Update" in auto_merge_content
+    or "daily-contribution" in auto_merge_content,
     "Checks mergeable status": "mergeable" in auto_merge_content,
     "Handles conflicts (dirty)": "dirty" in auto_merge_content,
     "Skips drafts": "draft" in auto_merge_content,
     "Has merge logic": "merge_pr" in auto_merge_content,
     "Reports summary": "merged_count" in auto_merge_content,
     "Handles network errors": "RequestException" in auto_merge_content,
-    "Reasonable timeout": "timeout=30" in auto_merge_content or "timeout" in auto_merge_content
+    "Reasonable timeout": "timeout=30" in auto_merge_content
+    or "timeout" in auto_merge_content,
 }
 
 for check_name, result in checks.items():
     status = "✅ PASS" if result else "❌ FAIL"
-    test_results["overall"] = "❌ FAIL" if not result and test_results["overall"] == "PENDING" else test_results["overall"]
+    test_results["overall"] = (
+        "❌ FAIL"
+        if not result and test_results["overall"] == "PENDING"
+        else test_results["overall"]
+    )
     print(f"  {status} {check_name}")
 
 # ============================================================================
@@ -239,18 +265,22 @@ print("TEST 5: Workflow File Implementation Details")
 print("=" * 80)
 
 print("\n5.1 Checking daily-contribution.yml...")
-with open(".github/workflows/daily-contribution.yml", 'r', encoding='utf-8') as f:
+with open(".github/workflows/daily-contribution.yml", "r", encoding="utf-8") as f:
     daily_content = f.read()
 
 daily_checks = {
-    "Schedules morning run (00:00)": "'0 0 * * *'" in daily_content or '"0 0 * * *"' in daily_content,
-    "Schedules afternoon run (12:00)": "'0 12 * * *'" in daily_content or '"0 12 * * *"' in daily_content,
+    "Schedules morning run (00:00)": "'0 0 * * *'" in daily_content
+    or '"0 0 * * *"' in daily_content,
+    "Schedules afternoon run (12:00)": "'0 12 * * *'" in daily_content
+    or '"0 12 * * *"' in daily_content,
     "Uses GH_TOKEN3 for PR creation": "GH_TOKEN3" in daily_content,
-    "Configures git user": "user.email" in daily_content and "user.name" in daily_content,
+    "Configures git user": "user.email" in daily_content
+    and "user.name" in daily_content,
     "Generates content": "generate_content.py" in daily_content,
     "Creates branches": "daily-contribution-" in daily_content,
     "Pushes to origin": "push origin" in daily_content,
-    "Uses dedicated auto-merge workflow": "auto-merge:" not in daily_content and "needs: make-contribution" not in daily_content
+    "Uses dedicated auto-merge workflow": "auto-merge:" not in daily_content
+    and "needs: make-contribution" not in daily_content,
 }
 
 for check_name, result in daily_checks.items():
@@ -258,17 +288,20 @@ for check_name, result in daily_checks.items():
     print(f"  {status} {check_name}")
 
 print("\n5.2 Checking auto-merge.yml...")
-with open(".github/workflows/auto-merge.yml", 'r', encoding='utf-8') as f:
+with open(".github/workflows/auto-merge.yml", "r", encoding="utf-8") as f:
     merge_content = f.read()
 
 merge_checks = {
-    "Schedule 1 hour after morning": "'0 1 * * *'" in merge_content or '"0 1 * * *"' in merge_content,
-    "Schedule 1 hour after afternoon": "'0 13 * * *'" in merge_content or '"0 13 * * *"' in merge_content,
+    "Schedule 1 hour after morning": "'0 1 * * *'" in merge_content
+    or '"0 1 * * *"' in merge_content,
+    "Schedule 1 hour after afternoon": "'0 13 * * *'" in merge_content
+    or '"0 13 * * *"' in merge_content,
     "Uses GH_TOKEN3": "GH_TOKEN3" in merge_content,
     "Runs conflict resolution first": "resolve_conflicts.py" in merge_content,
     "Then runs auto-merge": "auto_merge_prs.py" in merge_content,
-    "Installs requests package": "pip install requests" in merge_content or "requests" in merge_content,
-    "Has error handling": "continue-on-error" in merge_content
+    "Installs requests package": "pip install requests" in merge_content
+    or "requests" in merge_content,
+    "Has error handling": "continue-on-error" in merge_content,
 }
 
 for check_name, result in merge_checks.items():
@@ -286,25 +319,29 @@ print("\n6.1 Checking Python syntax...")
 for script in scripts_to_test:
     if not Path(script).exists():
         continue
-    
+
     try:
-        with open(script, 'r', encoding='utf-8') as file:
-            compile(file.read(), script, 'exec')
+        with open(script, "r", encoding="utf-8") as file:
+            compile(file.read(), script, "exec")
         print(f"  ✅ PASS {script}")
-        test_results["python_scripts"].append({
-            "script": script,
-            "test": "Python syntax",
-            "status": "✅ PASS",
-            "detail": "Valid Python"
-        })
+        test_results["python_scripts"].append(
+            {
+                "script": script,
+                "test": "Python syntax",
+                "status": "✅ PASS",
+                "detail": "Valid Python",
+            }
+        )
     except SyntaxError as e:
         print(f"  ❌ FAIL {script}: {str(e)[:60]}")
-        test_results["python_scripts"].append({
-            "script": script,
-            "test": "Python syntax",
-            "status": "❌ FAIL",
-            "detail": f"Syntax error: {str(e)[:60]}"
-        })
+        test_results["python_scripts"].append(
+            {
+                "script": script,
+                "test": "Python syntax",
+                "status": "❌ FAIL",
+                "detail": f"Syntax error: {str(e)[:60]}",
+            }
+        )
 
 # ============================================================================
 # SUMMARY REPORT
@@ -313,19 +350,39 @@ print("\n" + "=" * 80)
 print("📊 COMPREHENSIVE TEST SUMMARY")
 print("=" * 80)
 
+
 # Count results
 def count_status(results, status):
     return sum(1 for r in results if r.get("status", "").startswith(status[0]))
 
+
 total_tests = (
-    len(test_results["python_scripts"]) +
-    len(test_results["workflow_files"]) +
-    len(test_results["token_config"])
+    len(test_results["python_scripts"])
+    + len(test_results["workflow_files"])
+    + len(test_results["token_config"])
 )
 
-pass_tests = sum(1 for tests in test_results.values() if isinstance(tests, list) for t in tests if t.get("status", "").startswith("✅"))
-fail_tests = sum(1 for tests in test_results.values() if isinstance(tests, list) for t in tests if t.get("status", "").startswith("❌"))
-warn_tests = sum(1 for tests in test_results.values() if isinstance(tests, list) for t in tests if t.get("status", "").startswith("⚠️"))
+pass_tests = sum(
+    1
+    for tests in test_results.values()
+    if isinstance(tests, list)
+    for t in tests
+    if t.get("status", "").startswith("✅")
+)
+fail_tests = sum(
+    1
+    for tests in test_results.values()
+    if isinstance(tests, list)
+    for t in tests
+    if t.get("status", "").startswith("❌")
+)
+warn_tests = sum(
+    1
+    for tests in test_results.values()
+    if isinstance(tests, list)
+    for t in tests
+    if t.get("status", "").startswith("⚠️")
+)
 
 print(f"\nTotal Tests Run: {total_tests}")
 print(f"  ✅ PASS: {pass_tests}")
@@ -395,5 +452,5 @@ else:
                     print(f"  ❌ {t.get('script') or t.get('file')}: {t['test']}")
 
 print("\n" + "=" * 80)
-print("✨ Test completed at " + datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+print("✨ Test completed at " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 print("=" * 80)

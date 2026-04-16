@@ -69,8 +69,8 @@ def check_env_var(var: str, description: str) -> bool:
 def validate_python_syntax(filepath: str) -> bool:
     """Validate Python file syntax."""
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            compile(f.read(), filepath, 'exec')
+        with open(filepath, "r", encoding="utf-8") as f:
+            compile(f.read(), filepath, "exec")
         print(f"  ✅ {Path(filepath).name}: Valid Python syntax")
         return True
     except SyntaxError as e:
@@ -83,17 +83,17 @@ def validate_python_syntax(filepath: str) -> bool:
 
 def main():
     """Main validation function."""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("  🔍 AUTO-MERGE SYSTEM VALIDATION")
-    print("="*80 + "\n")
-    
+    print("=" * 80 + "\n")
+
     passed = 0
     failed = 0
     warnings = 0
-    
+
     # Get base directory
     base_dir = Path(__file__).parent.parent
-    
+
     # 1. Check Python Version
     print("1️⃣  PYTHON VERSION")
     print("-" * 80)
@@ -102,17 +102,19 @@ def main():
         print(f"  ✅ Python {py_version.major}.{py_version.minor}.{py_version.micro}")
         passed += 1
     else:
-        print(f"  ❌ Python {py_version.major}.{py_version.minor}.{py_version.micro} (requires 3.7+)")
+        print(
+            f"  ❌ Python {py_version.major}.{py_version.minor}.{py_version.micro} (requires 3.7+)"
+        )
         failed += 1
     print()
-    
+
     # 2. Check Required Modules
     print("2️⃣  PYTHON MODULES")
     print("-" * 80)
     modules_ok = True
-    for module in ['requests', 'json', 'os', 'sys']:
+    for module in ["requests", "json", "os", "sys"]:
         if not check_python_module(module):
-            if module != 'requests':  # requests is critical
+            if module != "requests":  # requests is critical
                 warnings += 1
             else:
                 failed += 1
@@ -120,14 +122,14 @@ def main():
         else:
             passed += 1
     print()
-    
+
     # 3. Check Required Scripts
     print("3️⃣  REQUIRED SCRIPTS")
     print("-" * 80)
     scripts = [
-        ('scripts/auto_merge_prs.py', 'Auto-merge script (main)'),
-        ('scripts/resolve_conflicts.py', 'Conflict resolution script'),
-        ('scripts/pr_status_report.py', 'Status report script'),
+        ("scripts/auto_merge_prs.py", "Auto-merge script (main)"),
+        ("scripts/resolve_conflicts.py", "Conflict resolution script"),
+        ("scripts/pr_status_report.py", "Status report script"),
     ]
     for script, desc in scripts:
         filepath = base_dir / script
@@ -139,15 +141,18 @@ def main():
         else:
             failed += 1
     print()
-    
+
     # 4. Check Documentation
     print("4️⃣  DOCUMENTATION")
     print("-" * 80)
     docs = [
-        ('docs/guides/CONFLICT_RESOLUTION_GUIDE.md', 'Complete conflict resolution guide'),
-        ('docs/guides/MERGE_QUICK_REFERENCE.md', 'Quick reference card'),
-        ('docs/guides/GETTING_STARTED.md', 'Getting started guide'),
-        ('docs/archive/IMPLEMENTATION_SUMMARY.md', 'Implementation details'),
+        (
+            "docs/guides/CONFLICT_RESOLUTION_GUIDE.md",
+            "Complete conflict resolution guide",
+        ),
+        ("docs/guides/MERGE_QUICK_REFERENCE.md", "Quick reference card"),
+        ("docs/guides/GETTING_STARTED.md", "Getting started guide"),
+        ("docs/archive/IMPLEMENTATION_SUMMARY.md", "Implementation details"),
     ]
     for doc, desc in docs:
         filepath = base_dir / doc
@@ -156,39 +161,39 @@ def main():
         else:
             warnings += 1
     print()
-    
+
     # 5. Check Workflow
     print("5️⃣  GITHUB ACTIONS WORKFLOW")
     print("-" * 80)
-    workflow_file = base_dir / '.github/workflows/auto-merge.yml'
-    if check_file_exists(str(workflow_file), 'Auto-merge workflow'):
+    workflow_file = base_dir / ".github/workflows/auto-merge.yml"
+    if check_file_exists(str(workflow_file), "Auto-merge workflow"):
         passed += 1
     else:
         warnings += 1
     print()
-    
+
     # 6. Check Environment
     print("6️⃣  ENVIRONMENT CONFIGURATION")
     print("-" * 80)
-    if check_env_var('GITHUB_TOKEN', 'GitHub token'):
+    if check_env_var("GITHUB_TOKEN", "GitHub token"):
         passed += 1
     else:
         warnings += 1
-    
-    if not os.environ.get('GITHUB_TOKEN') and not os.environ.get('GH_TOKEN'):
+
+    if not os.environ.get("GITHUB_TOKEN") and not os.environ.get("GH_TOKEN"):
         print("  💡 Set token for local testing:")
         print("     export GITHUB_TOKEN='your_token_here'")
     print()
-    
+
     # Summary
-    print("="*80)
+    print("=" * 80)
     print("  📊 VALIDATION SUMMARY")
-    print("="*80)
+    print("=" * 80)
     print(f"  ✅ Passed: {passed}")
     print(f"  ⚠️  Warnings: {warnings}")
     print(f"  ❌ Failed: {failed}")
     print()
-    
+
     if failed == 0 and warnings == 0:
         print("  🎉 ALL CHECKS PASSED! System is ready to use.")
         print()
@@ -199,7 +204,7 @@ def main():
         print("    4. Run: python scripts/auto_merge_prs.py")
         print()
         return 0
-    
+
     elif failed == 0:
         print("  ✅ SYSTEM IS FUNCTIONAL (with warnings)")
         print()
@@ -209,7 +214,7 @@ def main():
             print("    - GITHUB_TOKEN environment variable not set")
         print()
         return 0
-    
+
     else:
         print("  ❌ SYSTEM HAS CRITICAL ISSUES")
         print()

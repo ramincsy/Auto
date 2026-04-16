@@ -16,7 +16,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import sys
 
-
 TOPICS_FILE = "config/topics.json"
 DEFAULT_TOPICS = [
     "AI",
@@ -54,34 +53,34 @@ def get_random_topic(topics):
 def generate_contribution_file(date_str, index, topics):
     """
     Generate a single contribution file.
-    
+
     Args:
         date_str: Date in YYYY-MM-DD or YYYY-MM-DD-HH format
         index: Contribution index (0-4)
         topics: List of topics
-        
+
     Returns:
         Path to created file
     """
     parts = date_str.split("-")
     year, month, day = parts[0], parts[1], parts[2]
     hour = parts[3] if len(parts) > 3 else None
-    
+
     folder = Path("updates") / year / month
     folder.mkdir(parents=True, exist_ok=True)
-    
+
     # Create unique filename for each contribution
     filename = f"{day}-contribution-{index}.md"
     if hour:
         filename = f"{day}-{hour}-contribution-{index}.md"
     filepath = folder / filename
-    
+
     if filepath.exists():
         return None  # Skip if already exists
-    
+
     topic = get_random_topic(topics)
     timestamp = datetime.now().isoformat()
-    
+
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(f"# Contribution #{index} - {date_str}\n\n")
         f.write(f"**Timestamp:** {timestamp}\n\n")
@@ -95,7 +94,7 @@ def generate_contribution_file(date_str, index, topics):
         f.write(f"- Index: {index}\n")
         f.write(f"- Topic: {topic}\n")
         f.write(f"- Generated: {timestamp}\n")
-    
+
     return filepath
 
 
@@ -117,7 +116,7 @@ def get_date_string():
     hour = os.getenv("hour")
     minute = os.getenv("minute")
     second = os.getenv("second")
-    
+
     if not (year and month and day):
         now = datetime.now()
         year = now.strftime("%Y")
@@ -126,7 +125,7 @@ def get_date_string():
         hour = now.strftime("%H")
         minute = now.strftime("%M")
         second = now.strftime("%S")
-    
+
     if hour:
         result = f"{year}-{month}-{day}-{hour}"
         if minute:
@@ -154,9 +153,9 @@ def main():
 
     date_string = get_date_string()
     topics = load_topics()
-    
+
     print(f"📊 Generating {count} contributions for {date_string}...")
-    
+
     created_count = 0
     for i in range(count):
         filepath = generate_contribution_file(date_string, i, topics)
@@ -165,13 +164,13 @@ def main():
             created_count += 1
         else:
             print(f"  ⏭️  Skipped (already exists): contribution-{i}")
-    
+
     if created_count > 0:
         update_readme(date_string, created_count)
         print(f"\n✨ Successfully created {created_count} contribution files!")
     else:
         print(f"\n⚠️  No new contributions created (all already exist)")
-    
+
     return created_count
 
 

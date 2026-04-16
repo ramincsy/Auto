@@ -18,9 +18,15 @@ from datetime import datetime
 
 def get_github_token():
     """Get GitHub token from environment."""
-    token = os.environ.get('GH_TOKEN3') or os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN')
-    if token and not os.environ.get('GH_TOKEN3'):
-        print("⚠️ Warning: Using fallback GitHub token. Set GH_TOKEN3 to a personal access token so reviews and PR creation count on your GitHub profile.")
+    token = (
+        os.environ.get("GH_TOKEN3")
+        or os.environ.get("GITHUB_TOKEN")
+        or os.environ.get("GH_TOKEN")
+    )
+    if token and not os.environ.get("GH_TOKEN3"):
+        print(
+            "⚠️ Warning: Using fallback GitHub token. Set GH_TOKEN3 to a personal access token so reviews and PR creation count on your GitHub profile."
+        )
     if not token:
         print("❌ Error: No GitHub token found.")
         sys.exit(1)
@@ -29,8 +35,8 @@ def get_github_token():
 
 def get_repo_info():
     """Get repository info."""
-    repo = os.environ.get('GITHUB_REPOSITORY', 'ramincsy/Auto')
-    owner, repo_name = repo.split('/', 1)
+    repo = os.environ.get("GITHUB_REPOSITORY", "ramincsy/Auto")
+    owner, repo_name = repo.split("/", 1)
     return owner, repo_name
 
 
@@ -67,13 +73,10 @@ def get_contribution_prs(owner, repo, token, date_str, limit=None):
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls"
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
 
-    params = {
-        "state": "open",
-        "per_page": 100
-    }
+    params = {"state": "open", "per_page": 100}
 
     try:
         response = requests.get(url, headers=headers, params=params, timeout=30)
@@ -86,7 +89,7 @@ def get_contribution_prs(owner, repo, token, date_str, limit=None):
         # Filter for contribution PRs from today
         contribution_prs = []
         for pr in all_prs:
-            title = pr.get('title', '')
+            title = pr.get("title", "")
             if f"Contribution #" in title and date_str in title:
                 contribution_prs.append(pr)
 
@@ -105,7 +108,7 @@ def analyze_pr_changes(owner, repo, token, pr_number):
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/files"
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
 
     try:
@@ -116,16 +119,16 @@ def analyze_pr_changes(owner, repo, token, pr_number):
         files = response.json()
         analysis = {
             "total_files": len(files),
-            "additions": sum(f.get('additions', 0) for f in files),
-            "deletions": sum(f.get('deletions', 0) for f in files),
-            "changes": sum(f.get('changes', 0) for f in files),
-            "file_types": {}
+            "additions": sum(f.get("additions", 0) for f in files),
+            "deletions": sum(f.get("deletions", 0) for f in files),
+            "changes": sum(f.get("changes", 0) for f in files),
+            "file_types": {},
         }
 
         for file in files:
-            filename = file.get('filename', '')
-            if '.' in filename:
-                ext = filename.split('.')[-1]
+            filename = file.get("filename", "")
+            if "." in filename:
+                ext = filename.split(".")[-1]
                 analysis["file_types"][ext] = analysis["file_types"].get(ext, 0) + 1
 
         return analysis
@@ -150,8 +153,8 @@ def generate_review_comment(analysis, pr_title):
 ### 📁 File Types
 """
 
-    if analysis['file_types']:
-        for ext, count in analysis['file_types'].items():
+    if analysis["file_types"]:
+        for ext, count in analysis["file_types"].items():
             comment += f"- **.{ext}**: {count} file(s)\n"
     else:
         comment += "- No file type information available\n"
@@ -186,13 +189,10 @@ def submit_advanced_review(owner, repo, token, pr_number, pr_title):
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/reviews"
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
 
-    data = {
-        "event": "COMMENT",
-        "body": review_body
-    }
+    data = {"event": "COMMENT", "body": review_body}
 
     try:
         response = requests.post(url, json=data, headers=headers, timeout=30)
@@ -240,15 +240,17 @@ def main():
 
     # Review each PR
     for pr in prs:
-        pr_number = pr['number']
-        pr_title = pr['title']
+        pr_number = pr["number"]
+        pr_title = pr["title"]
         print(f"  Analyzing PR #{pr_number}: {pr_title}")
 
         if submit_advanced_review(owner, repo, token, pr_number, pr_title):
             reviewed_count += 1
 
     if reviewed_count > 0:
-        print(f"\n✨ Successfully completed advanced review for {reviewed_count} PR(s)!")
+        print(
+            f"\n✨ Successfully completed advanced review for {reviewed_count} PR(s)!"
+        )
     else:
         print(f"\n⚠️  No PRs were successfully reviewed")
 
