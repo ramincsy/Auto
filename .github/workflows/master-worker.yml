@@ -23,7 +23,7 @@ jobs:
   # مرحله 1: بررسی کیفیت کد
   code-quality:
     runs-on: ubuntu-22.04
-    if: inputs.mode == 'full' || inputs.mode == 'quality-only'
+    if: github.event.inputs.mode == 'full' || github.event.inputs.mode == 'quality-only'
     steps:
       - name: Trigger Code Quality Check
         run: |
@@ -37,7 +37,7 @@ jobs:
   contribution-system:
     runs-on: ubuntu-22.04
     needs: code-quality
-    if: inputs.mode == 'full' || inputs.mode == 'contribution-only'
+    if: github.event.inputs.mode == 'full' || github.event.inputs.mode == 'contribution-only'
     steps:
       - name: Trigger Complete Contribution System
         run: |
@@ -51,7 +51,7 @@ jobs:
   advanced-contribution:
     runs-on: ubuntu-22.04
     needs: contribution-system
-    if: inputs.mode == 'full' || inputs.mode == 'contribution-only'
+    if: github.event.inputs.mode == 'full' || github.event.inputs.mode == 'contribution-only'
     steps:
       - name: Trigger Advanced Contribution System
         run: |
@@ -65,7 +65,7 @@ jobs:
   weekly-quality:
     runs-on: ubuntu-22.04
     needs: advanced-contribution
-    if: inputs.mode == 'full' || inputs.mode == 'maintenance-only'
+    if: github.event.inputs.mode == 'full' || github.event.inputs.mode == 'maintenance-only'
     steps:
       - name: Trigger Weekly Quality Activity
         run: |
@@ -79,7 +79,7 @@ jobs:
   auto-merge:
     runs-on: ubuntu-22.04
     needs: [contribution-system, advanced-contribution, weekly-quality]
-    if: inputs.mode == 'full' || inputs.mode == 'maintenance-only'
+    if: github.event.inputs.mode == 'full' || github.event.inputs.mode == 'maintenance-only'
     steps:
       - name: Wait for contributions to settle
         run: sleep 300  # 5 minutes
@@ -96,7 +96,7 @@ jobs:
   copilot-review:
     runs-on: ubuntu-22.04
     needs: auto-merge
-    if: inputs.mode == 'full'
+    if: github.event.inputs.mode == 'full'
     steps:
       - name: Trigger Copilot Code Review
         run: |
@@ -107,7 +107,7 @@ jobs:
   copilot-coding:
     runs-on: ubuntu-22.04
     needs: copilot-review
-    if: inputs.mode == 'full'
+    if: github.event.inputs.mode == 'full'
     steps:
       - name: Trigger Copilot Coding Agent
         run: |
@@ -123,7 +123,7 @@ jobs:
       - name: Automation Summary
         run: |
           echo "🎉 Master Automation Worker completed!"
-          echo "📊 Mode: ${{ inputs.mode }}"
+          echo "📊 Mode: ${{ github.event.inputs.mode }}"
           echo "⏰ Completed at: $(date)"
           echo ""
           echo "Executed workflows:"
