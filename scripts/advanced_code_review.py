@@ -12,7 +12,6 @@ for contribution PRs, including code quality checks and suggestions.
 import os
 import sys
 import requests
-import json
 from datetime import datetime
 
 
@@ -90,7 +89,7 @@ def get_contribution_prs(owner, repo, token, date_str, limit=None):
         contribution_prs = []
         for pr in all_prs:
             title = pr.get("title", "")
-            if f"Contribution #" in title and date_str in title:
+            if "Contribution #" in title and date_str in title:
                 contribution_prs.append(pr)
 
         # Limit if specified
@@ -252,7 +251,7 @@ def main():
             f"\n✨ Successfully completed advanced review for {reviewed_count} PR(s)!"
         )
     else:
-        print(f"\n⚠️  No PRs were successfully reviewed")
+        print("\n⚠️  No PRs were successfully reviewed")
 
     return reviewed_count
 

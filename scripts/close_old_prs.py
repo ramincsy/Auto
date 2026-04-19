@@ -137,7 +137,7 @@ def main():
         if closed_count > 0:
             print(f"\n✨ Successfully closed {closed_count} PR(s)!")
         else:
-            print(f"\n⚠️  No PRs were successfully closed")
+            print("\n⚠️  No PRs were successfully closed")
     else:
         print(f"\n🔍 Would have closed {closed_count} PR(s)")
 

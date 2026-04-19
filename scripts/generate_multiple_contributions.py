@@ -12,7 +12,7 @@ Default:
 import os
 import random
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 import sys
 
@@ -169,7 +169,7 @@ def main():
         update_readme(date_string, created_count)
         print(f"\n✨ Successfully created {created_count} contribution files!")
     else:
-        print(f"\n⚠️  No new contributions created (all already exist)")
+        print("\n⚠️  No new contributions created (all already exist)")
 
     return created_count
 

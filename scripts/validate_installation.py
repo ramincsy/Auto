@@ -16,7 +16,6 @@ Returns:
 
 import os
 import sys
-import subprocess
 from pathlib import Path
 
 
@@ -111,14 +110,12 @@ def main():
     # 2. Check Required Modules
     print("2️⃣  PYTHON MODULES")
     print("-" * 80)
-    modules_ok = True
     for module in ["requests", "json", "os", "sys"]:
         if not check_python_module(module):
             if module != "requests":  # requests is critical
                 warnings += 1
             else:
                 failed += 1
-                modules_ok = False
         else:
             passed += 1
     print()

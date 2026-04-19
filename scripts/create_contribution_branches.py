@@ -134,10 +134,9 @@ def create_contribution_branch(date_str, index):
         if code == 0:
             run_command(f"git reset --hard origin/{branch_name}", check=False)
         else:
-            print(f"    ❌ Failed to create/checkout branch")
+            print("    ❌ Failed to create/checkout branch")
             return None
 
-    # Create or modify a unique file
     parts = date_str.split("-")
     year, month, day = parts[0], parts[1], parts[2]
     hour = parts[3] if len(parts) > 3 else None
@@ -184,13 +183,13 @@ Review this content before merging.
         # Push branch
         output, code = run_command(f"git push origin {branch_name} --force-with-lease")
         if code == 0:
-            print(f"    ✅ Branch created and pushed")
+            print("    ✅ Branch created and pushed")
             return branch_name
         else:
             print(f"    ❌ Failed to push branch: {output}")
             return None
     else:
-        print(f"    ⏭️  File already exists (branch skipped)")
+        print("    ⏭️  File already exists (branch skipped)")
         return None
 
 

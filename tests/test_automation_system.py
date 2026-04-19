@@ -5,8 +5,6 @@ Comprehensive test of GitHub automation system for ramincsy/Auto repository.
 
 import os
 import sys
-import subprocess
-import json
 from pathlib import Path
 from datetime import datetime
 
@@ -36,8 +34,8 @@ test_results = {
 print("=" * 80)
 print("🔍 COMPREHENSIVE GITHUB AUTOMATION SYSTEM TEST")
 print("=" * 80)
-print(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-print(f"Repository: ramincsy/Auto")
+print("Date: {0}".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+print("Repository: ramincsy/Auto")
 print("=" * 80)
 
 # ============================================================================
@@ -134,7 +132,7 @@ for workflow_file in workflow_files:
         yaml_valid = True
         if content.count(":") > 5 and content.count("\n") > 5:
             yaml_valid = True
-            print(f"  ✅ PASS YAML structure looks valid")
+            print("  ✅ PASS YAML structure looks valid")
             test_results["workflow_files"].append(
                 {
                     "file": workflow_file,
@@ -145,7 +143,7 @@ for workflow_file in workflow_files:
             )
         else:
             yaml_valid = False
-            print(f"  ❌ FAIL YAML structure issue detected")
+            print("  ❌ FAIL YAML structure issue detected")
             test_results["workflow_files"].append(
                 {
                     "file": workflow_file,

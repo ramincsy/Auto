@@ -12,8 +12,6 @@ Use --dry-run to see what would be deleted without actually deleting.
 import os
 import sys
 import subprocess
-import requests
-from datetime import datetime
 
 
 def get_github_token():
@@ -110,7 +108,7 @@ def main():
         if deleted_count > 0:
             print(f"\n✨ Successfully cleaned up {deleted_count} branch(es)!")
         else:
-            print(f"\n⚠️  No branches were successfully deleted")
+            print("\n⚠️  No branches were successfully deleted")
     else:
         print(f"\n🔍 Would have cleaned up {deleted_count} branch(es)")
 

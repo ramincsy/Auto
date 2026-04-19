@@ -5,7 +5,6 @@ Test script to verify the contribution system works locally
 
 import os
 import sys
-from datetime import datetime
 from pathlib import Path
 
 

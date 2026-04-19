@@ -8,11 +8,9 @@ Usage:
 This script checks that the entire system is functioning properly.
 """
 
-import os
 import sys
 import subprocess
 from pathlib import Path
-from datetime import datetime
 
 
 def run_command(cmd):
@@ -38,8 +36,8 @@ def count_commits():
         )
         if result.returncode == 0:
             lines = result.stdout.strip().split("\n")
-            return len([l for l in lines if l])
-    except:
+            return len([line for line in lines if line])
+    except Exception:
         pass
     return 0
 
@@ -52,8 +50,8 @@ def count_merged_prs():
         )
         if result.returncode == 0:
             lines = result.stdout.strip().split("\n")
-            return len([l for l in lines if "Merge pull request" in l])
-    except:
+            return len([line for line in lines if "Merge pull request" in line])
+    except Exception:
         pass
     return 0
 
