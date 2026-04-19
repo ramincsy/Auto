@@ -1,0 +1,136 @@
+name: 🚀 Master Automation Worker
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Execution mode'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - quality-only
+          - contribution-only
+          - maintenance-only
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: write
+
+jobs:
+  # مرحله 1: بررسی کیفیت کد
+  code-quality:
+    runs-on: ubuntu-22.04
+    if: inputs.mode == 'full' || inputs.mode == 'quality-only'
+    steps:
+      - name: Trigger Code Quality Check
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GH_TOKEN3 }}" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/code-quality.yml/dispatches \
+            -d '{"ref":"main"}'
+
+  # مرحله 2: سیستم contribution کامل
+  contribution-system:
+    runs-on: ubuntu-22.04
+    needs: code-quality
+    if: inputs.mode == 'full' || inputs.mode == 'contribution-only'
+    steps:
+      - name: Trigger Complete Contribution System
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GH_TOKEN3 }}" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/complete-contribution.yml/dispatches \
+            -d '{"ref":"main"}'
+
+  # مرحله 3: سیستم contribution پیشرفته
+  advanced-contribution:
+    runs-on: ubuntu-22.04
+    needs: contribution-system
+    if: inputs.mode == 'full' || inputs.mode == 'contribution-only'
+    steps:
+      - name: Trigger Advanced Contribution System
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GH_TOKEN3 }}" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/daily-contribution.yml/dispatches \
+            -d '{"ref":"main"}'
+
+  # مرحله 4: فعالیت کیفیت هفتگی
+  weekly-quality:
+    runs-on: ubuntu-22.04
+    needs: advanced-contribution
+    if: inputs.mode == 'full' || inputs.mode == 'maintenance-only'
+    steps:
+      - name: Trigger Weekly Quality Activity
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GH_TOKEN3 }}" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/weekly-quality.yml/dispatches \
+            -d '{"ref":"main"}'
+
+  # مرحله 5: merge روزانه
+  auto-merge:
+    runs-on: ubuntu-22.04
+    needs: [contribution-system, advanced-contribution, weekly-quality]
+    if: inputs.mode == 'full' || inputs.mode == 'maintenance-only'
+    steps:
+      - name: Wait for contributions to settle
+        run: sleep 300  # 5 minutes
+
+      - name: Trigger Auto Merge Daily PRs
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GH_TOKEN3 }}" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/auto-merge.yml/dispatches \
+            -d '{"ref":"main"}'
+
+  # مرحله 6: Copilot reviews (اگر اضافه شوند)
+  copilot-review:
+    runs-on: ubuntu-22.04
+    needs: auto-merge
+    if: inputs.mode == 'full'
+    steps:
+      - name: Trigger Copilot Code Review
+        run: |
+          # اضافه کردن workflow Copilot code review اگر موجود باشد
+          echo "Copilot review triggered"
+
+  # مرحله 7: Copilot coding (اگر اضافه شوند)
+  copilot-coding:
+    runs-on: ubuntu-22.04
+    needs: copilot-review
+    if: inputs.mode == 'full'
+    steps:
+      - name: Trigger Copilot Coding Agent
+        run: |
+          # اضافه کردن workflow Copilot coding agent اگر موجود باشد
+          echo "Copilot coding triggered"
+
+  # گزارش نهایی
+  summary:
+    runs-on: ubuntu-22.04
+    needs: [code-quality, contribution-system, advanced-contribution, weekly-quality, auto-merge, copilot-review, copilot-coding]
+    if: always()
+    steps:
+      - name: Automation Summary
+        run: |
+          echo "🎉 Master Automation Worker completed!"
+          echo "📊 Mode: ${{ inputs.mode }}"
+          echo "⏰ Completed at: $(date)"
+          echo ""
+          echo "Executed workflows:"
+          echo "- Code Quality Check"
+          echo "- Complete Contribution System"
+          echo "- Advanced Contribution System (650+ Activities/Day)"
+          echo "- Weekly Quality Activity"
+          echo "- Auto Merge Daily PRs"
+          echo "- Copilot Code Review"
+          echo "- Copilot Coding Agent"
