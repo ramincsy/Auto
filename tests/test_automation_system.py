@@ -34,7 +34,7 @@ test_results = {
 print("=" * 80)
 print("🔍 COMPREHENSIVE GITHUB AUTOMATION SYSTEM TEST")
 print("=" * 80)
-print("Date: {0}".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+print("Date: {0}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 print("Repository: ramincsy/Auto")
 print("=" * 80)
 
