@@ -144,10 +144,10 @@ def generate_review_comment(analysis, pr_title):
     comment = f"""## 🔍 Advanced Code Review: {pr_title}
 
 ### 📊 Change Analysis
-- **Files Modified**: {analysis['total_files']}
-- **Lines Added**: +{analysis['additions']}
-- **Lines Removed**: -{analysis['deletions']}
-- **Total Changes**: {analysis['changes']}
+- **Files Modified**: {analysis["total_files"]}
+- **Lines Added**: +{analysis["additions"]}
+- **Lines Removed**: -{analysis["deletions"]}
+- **Total Changes**: {analysis["changes"]}
 
 ### 📁 File Types
 """
