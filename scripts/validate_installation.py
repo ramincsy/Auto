@@ -75,8 +75,8 @@ def validate_python_syntax(filepath: str) -> bool:
     except SyntaxError as e:
         print(f"  ❌ {Path(filepath).name}: Syntax error at line {e.lineno}: {e.msg}")
         return False
-    except Exception as e:
-        print(f"  ❌ {Path(filepath).name}: Error: {e}")
+    except (OSError, UnicodeDecodeError) as e:
+        print(f"  ❌ {Path(filepath).name}: Error: {e!s}")
         return False
 
 
