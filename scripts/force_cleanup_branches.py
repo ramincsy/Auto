@@ -18,11 +18,11 @@ def run_git_command(command):
     """Run a git command and return output."""
     try:
         result = subprocess.run(
-            command, shell=True, capture_output=True, text=True, cwd=os.getcwd()
+            command, shell=True, capture_output=True, text=True, cwd=os.getcwd(), check=False
         )
         return result.returncode == 0, result.stdout.strip(), result.stderr.strip()
-    except Exception as e:
-        return False, "", str(e)
+    except (OSError, subprocess.SubprocessError) as e:
+        return False, "", f"{e!s}"
 
 
 def get_contribution_branches():
