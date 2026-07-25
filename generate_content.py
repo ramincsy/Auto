@@ -25,7 +25,7 @@ def load_topics():
             with open(TOPICS_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 return data.get("topics", DEFAULT_TOPICS)
-        except Exception:
+        except (json.JSONDecodeError, OSError):
             return DEFAULT_TOPICS
     return DEFAULT_TOPICS
 
@@ -36,7 +36,7 @@ def get_topic_for_date(date_str, topics):
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
         week_offset = date_obj.isocalendar()[1] % len(topics)
         return topics[week_offset]
-    except Exception:
+    except ValueError:
         return random.choice(topics)
 
 
@@ -65,7 +65,10 @@ def get_date_string():
     else:
         hour = hour or "00"
 
-    hour_int = int(hour)
+    try:
+        hour_int = int(hour)
+    except ValueError:
+        hour_int = 0
     period = "morning" if hour_int < 12 else "afternoon"
     return f"{year}-{month}-{day}", period
 
