@@ -16,10 +16,10 @@ from pathlib import Path
 def run_command(cmd):
     """Run a shell command and return success, output."""
     try:
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
         return result.returncode == 0, result.stdout.strip()
-    except Exception as e:
-        return False, str(e)
+    except (OSError, subprocess.SubprocessError) as e:
+        return False, f"{e!s}"
 
 
 def check_git_repo():
@@ -32,13 +32,13 @@ def count_commits():
     """Count total commits."""
     try:
         result = subprocess.run(
-            "git log --all --oneline", shell=True, capture_output=True, text=True
+            "git log --all --oneline", shell=True, capture_output=True, text=True, check=False
         )
         if result.returncode == 0:
             lines = result.stdout.strip().split("\n")
             return len([line for line in lines if line])
-    except Exception:
-        pass
+    except (OSError, subprocess.SubprocessError) as e:
+        sys.stderr.write(f"count_commits: {e!s}\n")
     return 0
 
 
@@ -46,13 +46,13 @@ def count_merged_prs():
     """Count merged PRs."""
     try:
         result = subprocess.run(
-            "git log --all --oneline", shell=True, capture_output=True, text=True
+            "git log --all --oneline", shell=True, capture_output=True, text=True, check=False
         )
         if result.returncode == 0:
             lines = result.stdout.strip().split("\n")
             return len([line for line in lines if "Merge pull request" in line])
-    except Exception:
-        pass
+    except (OSError, subprocess.SubprocessError) as e:
+        sys.stderr.write(f"count_merged_prs: {e!s}\n")
     return 0
 
 
